@@ -1,12 +1,10 @@
 <?php
-// config/DB.php
 
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// Preflight OPTIONS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
@@ -26,13 +24,15 @@ function get_json_body(): array {
 }
 
 function pdo(): PDO {
-    $host    = "127.0.0.1";
-    $db      = "noxum_db";   
-    $user    = "root";
-    $pass    = "";            
+    // Usa variables de entorno de Railway si existen, si no usa localhost (XAMPP)
+    $host    = getenv('MYSQLHOST')     ?: "127.0.0.1";
+    $port    = getenv('MYSQLPORT')     ?: "3306";
+    $db      = getenv('MYSQLDATABASE') ?: "noxum_db";
+    $user    = getenv('MYSQLUSER')     ?: "root";
+    $pass    = getenv('MYSQLPASSWORD') ?: "";
     $charset = "utf8mb4";
 
-    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+    $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=$charset";
     $options = [
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
