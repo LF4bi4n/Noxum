@@ -1,9 +1,9 @@
 <?php
 echo json_encode([
-    'MYSQLHOST'     => getenv('MYSQLHOST'),
-    'MYSQLDATABASE' => getenv('MYSQLDATABASE'),
-    'MYSQLUSER'     => getenv('MYSQLUSER'),
-    'MYSQLPORT'     => getenv('MYSQLPORT'),
-    'env'           => $_ENV,
-    'server_keys'   => array_keys($_SERVER),
+    'MYSQLHOST'      => getenv('MYSQLHOST'),
+    'MYSQLDATABASE'  => getenv('MYSQLDATABASE'),
+    'MYSQL_DATABASE' => getenv('MYSQL_DATABASE'),
+    'MYSQLUSER'      => getenv('MYSQLUSER'),
+    'MYSQLPORT'      => getenv('MYSQLPORT'),
+    'MYSQLPASSWORD'  => getenv('MYSQLPASSWORD') ? 'SET' : 'NOT SET',
 ]);

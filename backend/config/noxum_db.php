@@ -26,11 +26,11 @@ function get_json_body(): array {
 }
 
 function pdo(): PDO {
-    $host    = getenv('MYSQLHOST')     ?: "127.0.0.1";
-    $port    = getenv('MYSQLPORT')     ?: "3306";
-    $db      = getenv('MYSQLDATABASE') ?: "noxum_db";
-    $user    = getenv('MYSQLUSER')     ?: "root";
-    $pass    = getenv('MYSQLPASSWORD') ?: "";
+    $host    = getenv('MYSQLHOST')      ?: "127.0.0.1";
+    $port    = getenv('MYSQLPORT')      ?: "3306";
+    $db      = getenv('MYSQL_DATABASE') ?: "noxum_db";
+    $user    = getenv('MYSQLUSER')      ?: "root";
+    $pass    = getenv('MYSQLPASSWORD')  ?: "";
     $charset = "utf8mb4";
 
     $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=$charset";
