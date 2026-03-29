@@ -10,22 +10,32 @@ if (strpos($uri, '/backend/') === 0) {
         return;
     }
     http_response_code(404);
-    echo json_encode(['ok' => false, 'error' => 'Not found', 'path' => $file]);
+    echo json_encode(['ok' => false, 'error' => 'Not found']);
     return;
 }
 
-// Archivos estáticos del frontend
-if ($uri !== '/' && $uri !== '') {
-    $static = $base . '/frontend' . $uri;
-    if (file_exists($static) && !is_dir($static)) {
-        return false;
+// Archivos estáticos del frontend (css, js, img, etc.)
+$static = $base . '/frontend' . $uri;
+if ($uri !== '/' && file_exists($static) && !is_dir($static)) {
+    $ext = pathinfo($static, PATHINFO_EXTENSION);
+    $mimes = [
+        'css'  => 'text/css',
+        'js'   => 'application/javascript',
+        'png'  => 'image/png',
+        'jpg'  => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'ico'  => 'image/x-icon',
+        'svg'  => 'image/svg+xml',
+        'html' => 'text/html',
+        'woff2'=> 'font/woff2',
+        'woff' => 'font/woff',
+    ];
+    if (isset($mimes[$ext])) {
+        header('Content-Type: ' . $mimes[$ext]);
     }
+    readfile($static);
+    return;
 }
 
 // Index
-$index = $base . '/frontend/index.php';
-if (file_exists($index)) {
-    require $index;
-} else {
-    readfile($base . '/frontend/index.html');
-}
+readfile($base . '/frontend/index.html');
