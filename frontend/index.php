@@ -1,4 +1,5 @@
 <?php
-$file = __DIR__ . '/index.html';
-$content = file_get_contents($file);
-echo $content;
+$html = file_get_contents(__DIR__ . '/index.html');
+header('Content-Type: text/html; charset=utf-8');
+echo $html;
+exit;
