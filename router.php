@@ -1,26 +1,31 @@
 <?php
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$base = __DIR__;
 
+// Rutas del backend
 if (strpos($uri, '/backend/') === 0) {
-    $file = __DIR__ . $uri;
-    if (file_exists($file)) {
+    $file = $base . $uri;
+    if (file_exists($file) && !is_dir($file)) {
         require $file;
-    } else {
-        http_response_code(404);
-        echo json_encode(['ok' => false, 'error' => 'Not found: ' . $file]);
+        return;
     }
+    http_response_code(404);
+    echo json_encode(['ok' => false, 'error' => 'Not found', 'path' => $file]);
     return;
 }
 
-$frontendFile = __DIR__ . '/frontend' . $uri;
-
-if ($uri === '/' || $uri === '') {
-    require __DIR__ . '/frontend/index.php';
-    return;
+// Archivos estáticos del frontend
+if ($uri !== '/' && $uri !== '') {
+    $static = $base . '/frontend' . $uri;
+    if (file_exists($static) && !is_dir($static)) {
+        return false;
+    }
 }
 
-if (file_exists($frontendFile) && !is_dir($frontendFile)) {
-    return false;
+// Index
+$index = $base . '/frontend/index.php';
+if (file_exists($index)) {
+    require $index;
+} else {
+    readfile($base . '/frontend/index.html');
 }
-
-require __DIR__ . '/frontend/index.php';
