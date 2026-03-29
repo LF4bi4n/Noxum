@@ -1,8 +1,4 @@
 {
-  "name": "noxum/app",
-  "description": "Noxum - Centro de Orientación Psicológica",
-  "type": "project",
-  "require": {
-    "php": ">=8.0"
-  }
+    "name": "noxum/app",
+    "type": "project"
 }
