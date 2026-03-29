@@ -1,3 +1,4 @@
 <?php
-// Serve index.html directly
-readfile(__DIR__ . '/index.html');
+$file = __DIR__ . '/index.html';
+$content = file_get_contents($file);
+echo $content;
