@@ -97,5 +97,5 @@ try {
     ], 201);
 
 } catch (PDOException $e) {
-    json_response(["ok" => false, "errors" => ["Error interno del servidor."]], 500);
+    json_response(["ok" => false, "errors" => [$e->getMessage()]], 500);
 }
