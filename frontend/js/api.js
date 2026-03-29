@@ -1,5 +1,5 @@
 
-const API_BASE = "http://localhost/noxum/backend/api";
+const API_BASE = "https://noxum-production.up.railway.app/backend/api";
 
 async function apiFetch(endpoint, options = {}) {
     const url = `${API_BASE}${endpoint}`;

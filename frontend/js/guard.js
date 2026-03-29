@@ -7,7 +7,7 @@
 //   <script src="js/guard.js" data-rol="recepcionista"></script>
 
 (async () => {
-  const API = 'http://localhost/noxum/backend/api';
+  const API = 'https://noxum-production.up.railway.app/backend/api';
 
   const rolRequerido = document.currentScript?.dataset?.rol;
 
