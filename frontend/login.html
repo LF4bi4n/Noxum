@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar Sesión — COPAS</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body class="login-body">
+
+  <!-- ══ NAVBAR ══ -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">
+        <svg class="brand-logo" viewBox="0 0 36 36" fill="none">
+          <rect width="36" height="36" rx="10" fill="#2D7A4F"/>
+          <path d="M12 24V14l6 7 6-7v10" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="11" r="2.5" fill="#C8EDD8"/>
+        </svg>
+        <div class="brand-text">
+          <strong>COPAS</strong>
+          <span>Orientación & Apoyo</span>
+        </div>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ══ MAIN ══ -->
+  <main class="login-main">
+    <div class="login-card-wrap">
+
+      <!-- Avatar flotante sobre la card -->
+      <div class="login-avatar">
+        <svg width="36" height="36" fill="none" viewBox="0 0 24 24">
+          <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" fill="#fff"/>
+        </svg>
+      </div>
+
+      <!-- Card -->
+      <div class="login-card">
+
+        <!-- Alerta global -->
+        <div class="auth-alert" id="authAlert" role="alert"></div>
+
+        <form id="loginForm" novalidate autocomplete="off">
+
+          <!-- Email -->
+          <div class="login-field">
+            <div class="login-input-wrap">
+              <svg class="login-icon" width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="#9CA3AF" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+              <input type="email" id="email" name="email"
+                     class="login-input" placeholder="email"
+                     required autocomplete="email"/>
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="login-field">
+            <div class="login-input-wrap">
+              <svg class="login-icon" width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="#9CA3AF" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+              <input type="password" id="password" name="password"
+                     class="login-input" placeholder="••••••••••"
+                     required autocomplete="current-password"/>
+            </div>
+          </div>
+
+          <!-- Show password + Forgot password -->
+          <div class="login-row">
+            <label class="show-pw-label">
+              <input type="checkbox" id="showPw" />
+              Show password
+            </label>
+            <a href="#" class="forgot-link">Forgot password?</a>
+          </div>
+
+          <!-- Botón -->
+          <button type="submit" class="login-btn">
+            <span class="btn-text">LOGIN</span>
+            <div class="spinner"></div>
+          </button>
+
+        </form>
+
+        <!-- Link a registro -->
+        <div class="login-signup">
+          <a href="register.html">Don't have an account? Sign Up</a>
+        </div>
+
+      </div><!-- /login-card -->
+    </div><!-- /login-card-wrap -->
+  </main>
+
+  <!-- ══ FOOTER ══ -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">
+            <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+              <rect width="36" height="36" rx="10" fill="#5BAF7A" opacity=".3"/>
+              <path d="M12 24V14l6 7 6-7v10" stroke="#C8EDD8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="18" cy="11" r="2.5" fill="#C8EDD8"/>
+            </svg>
+            <div>
+              <strong>COPAS</strong>
+              <span>Orientación & Apoyo</span>
+            </div>
+          </div>
+          <p class="footer-desc">Espacio dedicado a la orientación, apoyo y transformación social.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Centro</h4>
+          <a href="#">Nuestro Equipo</a>
+          <a href="#">Infraestructura</a>
+          <a href="#">Ética Profesional</a>
+        </div>
+        <div class="footer-col">
+          <h4>Soporte</h4>
+          <a href="#">Contacto</a>
+          <a href="#">Emergencias</a>
+        </div>
+        <div class="footer-col">
+          <h4>Centro</h4>
+          <a href="login.html">Iniciar sesión</a>
+          <a href="register.html">Registrarse</a>
+        </div>
+      </div>
+      <div class="footer-bottom">© 2024 COPAS — Todos los derechos reservados.</div>
+    </div>
+  </footer>
+
+  <script>
+    const API = 'http://localhost/noxum/backend/api';
+
+    async function apiFetch(url, opts = {}) {
+      try {
+        const res = await fetch(url, {
+          ...opts,
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) }
+        });
+        const data = await res.json().catch(() => ({}));
+        return { ok: res.ok, data };
+      } catch(e) {
+        return { ok: false, data: { errors: ['No se pudo conectar con el servidor.'] } };
+      }
+    }
+
+    function redirigirPorRol(rol) {
+      if (rol === 'doctor')   return window.location.replace('dashboard_doctor.html');
+      if (rol === 'paciente') return window.location.replace('dashboard_paciente.html');
+      return window.location.replace('dashboard_admin.html');
+    }
+
+    function showAlert(type, messages) {
+      const el = document.getElementById('authAlert');
+      el.className = `auth-alert alert-${type} visible`;
+      el.innerHTML = Array.isArray(messages) ? messages.join('<br>') : messages;
+    }
+
+    function hideAlert() {
+      const el = document.getElementById('authAlert');
+      el.className = 'auth-alert';
+      el.textContent = '';
+    }
+
+    // Verificar si ya hay sesión activa
+    (async () => {
+      const { ok, data } = await apiFetch(`${API}/login.php?check`);
+      if (ok && data.usuario) {
+        redirigirPorRol(data.usuario.rol);
+      }
+    })();
+
+    // Checkbox show password
+    document.getElementById('showPw').addEventListener('change', function () {
+      document.getElementById('password').type = this.checked ? 'text' : 'password';
+    });
+
+    // Submit login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAlert();
+
+      const btn = e.target.querySelector('.login-btn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      const email    = e.target.email.value.trim().toLowerCase();
+      const password = e.target.password.value;
+
+      const { ok, data } = await apiFetch(`${API}/login.php`, {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+
+      if (ok && data.ok) {
+        showAlert('success', `¡Bienvenido, ${data.usuario.nombre}!`);
+        setTimeout(() => redirigirPorRol(data.usuario.rol), 1000);
+      } else {
+        showAlert('error', data.errors || [data.mensaje] || ['Credenciales incorrectas.']);
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    });
+  </script>
+
+</body>
+</html>

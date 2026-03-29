@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Especialistas — COPAS</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/especialistas.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">
+        <svg class="brand-logo" viewBox="0 0 36 36" fill="none">
+          <rect width="36" height="36" rx="10" fill="#2D7A4F"/>
+          <path d="M12 24V14l6 7 6-7v10" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="11" r="2.5" fill="#C8EDD8"/>
+        </svg>
+        <div class="brand-text">
+          <strong>COPAS</strong>
+          <span>Orientación & Apoyo</span>
+        </div>
+      </a>
+
+      <div class="navbar-links">
+        <a href="index.html">Inicio</a>
+        <a href="index.html#servicios">Servicios</a>
+        <a href="especialistas.html" style="color:var(--verde); font-weight:600">Especialistas</a>
+      </div>
+
+      <div class="navbar-actions">
+        <a href="login.html" class="btn btn-ghost">Iniciar Sesión</a>
+        <a href="register.html" class="btn btn-primary">Agendar Cita</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="especialistas-hero">
+    <div class="container">
+      <h1>Nuestros Especialistas</h1>
+      <p>Conoce a nuestro equipo de profesionales certificados en psicología y atención social.</p>
+    </div>
+  </section>
+
+  <!-- LISTA DE ESPECIALISTAS -->
+  <section class="especialistas-section">
+    <div class="container">
+      <div class="especialistas-grid" id="especialistasGrid">
+
+        <!-- Estado de carga -->
+        <div class="loading-state" id="loadingState">
+          <div class="spinner-circle"></div>
+          <p>Cargando especialistas...</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">
+            <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+              <rect width="36" height="36" rx="10" fill="#5BAF7A" opacity=".3"/>
+              <path d="M12 24V14l6 7 6-7v10" stroke="#C8EDD8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="18" cy="11" r="2.5" fill="#C8EDD8"/>
+            </svg>
+            <div>
+              <strong>COPAS</strong>
+              <span>Orientación & Apoyo</span>
+            </div>
+          </div>
+          <p class="footer-desc">Espacio dedicado a la orientación, apoyo y transformación social.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Centro</h4>
+          <a href="#">Nuestro Equipo</a>
+          <a href="#">Instalaciones</a>
+          <a href="#">Ética Profesional</a>
+        </div>
+        <div class="footer-col">
+          <h4>Soporte</h4>
+          <a href="#">Contacto</a>
+          <a href="#">Emergencias</a>
+        </div>
+        <div class="footer-col">
+          <h4>Portal</h4>
+          <a href="login.html">Iniciar sesión</a>
+          <a href="register.html">Registrarse</a>
+        </div>
+      </div>
+      <div class="footer-bottom">© 2026 COPAS — Todos los derechos reservados.</div>
+    </div>
+  </footer>
+
+  <script>
+    const API = 'http://localhost/noxum/backend/api';
+
+    // Ícono SVG por defecto para doctores sin foto
+    // Para cambiar la foto de un especialista:
+    // 1. Agrega la imagen en frontend/img/doctores/
+    //    Ejemplo: img/doctores/laura-gonzalez.jpg
+    // 2. En la función renderEspecialistas, cambia avatarHtml por:
+    //    <img src="img/doctores/tu-imagen.jpg" alt="${e.nombre}">
+    function avatarDefault() {
+      return `
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+        </svg>`;
+    }
+
+    function renderEspecialistas(lista) {
+      const grid = document.getElementById('especialistasGrid');
+
+      if (lista.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <p>No hay especialistas registrados aún.</p>
+          </div>`;
+        return;
+      }
+
+      const html = lista.map(e => {
+        // Especialidades — separamos por coma si hay varias
+        const specs = e.especialidad
+          .split(',')
+          .map(s => s.trim())
+          .filter(s => s.length > 0)
+          .map(s => `<li>Especialista en ${s}</li>`)
+          .join('');
+
+        return `
+          <div class="especialista-card">
+            <div class="especialista-avatar">
+              ${avatarDefault()}
+            </div>
+            <div class="especialista-info">
+              <div class="especialista-nombre">${e.nombre}</div>
+              <ul class="especialista-specs">
+                ${specs}
+              </ul>
+            </div>
+            <a href="register.html" class="btn-ver-mas">
+              Ver Más
+            </a>
+          </div>`;
+      }).join('');
+
+      grid.innerHTML = html;
+    }
+
+    // Cargar especialistas desde la API
+    (async () => {
+      try {
+        const res  = await fetch(`${API}/especialistas.php`, { credentials: 'include' });
+        const data = await res.json();
+
+        if (data.ok && data.especialistas) {
+          renderEspecialistas(data.especialistas);
+        } else {
+          throw new Error('Sin datos');
+        }
+      } catch {
+        document.getElementById('especialistasGrid').innerHTML = `
+          <div class="empty-state">
+            <p>No se pudieron cargar los especialistas. Intenta más tarde.</p>
+          </div>`;
+      }
+    })();
+  </script>
+
+</body>
+</html>

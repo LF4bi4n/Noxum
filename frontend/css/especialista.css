@@ -1,0 +1,250 @@
+/* ── Sección Especialistas (index.html) ──────────────── */
+.especialistas {
+  padding: 80px 0;
+  background: #1a1a1a;
+}
+
+.especialistas .section-header h2,
+.especialistas .section-header p {
+  color: #fff;
+}
+
+.especialistas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.especialista-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+}
+
+.especialista-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0,0,0,.2);
+}
+
+.especialista-avatar {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: #2D7A4F;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.especialista-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.especialista-info h3 {
+  font-family: 'Inter', sans-serif;
+  font-size: .95rem;
+  font-weight: 700;
+  color: #1E293B;
+  margin-bottom: 6px;
+}
+
+.especialista-info p {
+  font-family: 'Inter', sans-serif;
+  font-size: .78rem;
+  color: #475569;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.btn-agendar {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  background: #2D7A4F;
+  color: #fff;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: flex-end;
+  transition: all .18s;
+}
+
+.btn-agendar:hover {
+  background: #1B5E37;
+  box-shadow: 0 4px 14px rgba(45,122,79,.3);
+}
+
+/* Layout de card: avatar + info arriba, botón abajo a la derecha */
+.especialista-card {
+  flex-wrap: wrap;
+}
+
+.especialista-card .especialista-avatar,
+.especialista-card .especialista-info {
+  flex-shrink: 0;
+}
+
+.especialista-card {
+  display: grid;
+  grid-template-columns: 68px 1fr auto;
+  grid-template-rows: auto;
+  align-items: center;
+  gap: 0 20px;
+}
+
+.especialista-card .btn-agendar {
+  grid-column: 3;
+  grid-row: 1;
+  align-self: center;
+}
+
+/* ── Página Detalle Especialista ─────────────────────── */
+.esp-detalle {
+  padding: 48px 0 80px;
+  min-height: calc(100vh - 72px);
+  background: #F8FAFC;
+}
+
+.esp-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: .82rem;
+  font-weight: 600;
+  color: #2D7A4F;
+  text-decoration: none;
+  margin-bottom: 28px;
+  transition: gap .15s;
+}
+.esp-back:hover { gap: 10px; }
+
+.esp-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px;
+  display: flex;
+  gap: 36px;
+  align-items: flex-start;
+  box-shadow: 0 4px 24px rgba(0,0,0,.07);
+  border: 1px solid #E2E8F0;
+  max-width: 800px;
+}
+
+.esp-avatar {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2D7A4F, #1B5E37);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 8px 24px rgba(45,122,79,.3);
+}
+
+.esp-info { flex: 1; }
+
+.esp-nombre {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1E293B;
+  margin-bottom: 14px;
+  letter-spacing: -.02em;
+}
+
+.esp-especialidades {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.esp-tag {
+  display: inline-flex;
+  padding: 4px 12px;
+  background: #D1FAE5;
+  color: #065F46;
+  border-radius: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: .74rem;
+  font-weight: 600;
+}
+
+.esp-divider {
+  height: 1px;
+  background: #F1F5F9;
+  margin: 20px 0;
+}
+
+.esp-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.esp-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: .84rem;
+  color: #475569;
+}
+
+.esp-meta-item svg { color: #2D7A4F; flex-shrink: 0; }
+
+.esp-bio {
+  font-family: 'Inter', sans-serif;
+  font-size: .88rem;
+  color: #64748B;
+  line-height: 1.75;
+}
+
+.esp-btn-agendar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 28px;
+  padding: 14px 32px;
+  background: #2D7A4F;
+  color: #fff;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: .85rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all .2s;
+}
+
+.esp-btn-agendar:hover {
+  background: #1B5E37;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(45,122,79,.35);
+}
+
+@media (max-width: 640px) {
+  .esp-card { flex-direction: column; align-items: center; text-align: center; padding: 28px 20px; }
+  .esp-especialidades { justify-content: center; }
+  .especialista-card { flex-wrap: wrap; }
+  .btn-agendar { width: 100%; justify-content: center; }
+}

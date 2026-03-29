@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro — COPAS</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body class="register-body">
+
+  <!-- ══ NAVBAR ══ -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">
+        <svg class="brand-logo" viewBox="0 0 36 36" fill="none">
+          <rect width="36" height="36" rx="10" fill="#2D7A4F"/>
+          <path d="M12 24V14l6 7 6-7v10" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="11" r="2.5" fill="#C8EDD8"/>
+        </svg>
+        <div class="brand-text">
+          <strong>COPAS</strong>
+          <span>Orientación & Apoyo</span>
+        </div>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ══ MAIN ══ -->
+  <main class="register-main">
+
+    <!-- Izquierda: formulario en card -->
+    <div class="register-form-side">
+      <div class="register-card">
+
+        <h2>Registro</h2>
+
+        <!-- Alerta global -->
+        <div class="auth-alert" id="authAlert" role="alert"></div>
+
+        <form id="registerForm" novalidate autocomplete="off">
+
+          <div class="reg-field">
+            <label class="reg-label" for="nombre">Name</label>
+            <input type="text" id="nombre" name="nombre"
+                   class="reg-input" placeholder="" required autocomplete="given-name"/>
+          </div>
+
+          <div class="reg-field">
+            <label class="reg-label" for="apellido">Last Name</label>
+            <input type="text" id="apellido" name="apellido"
+                   class="reg-input" placeholder="" required autocomplete="family-name"/>
+          </div>
+
+          <div class="reg-field">
+            <label class="reg-label" for="email">Email</label>
+            <input type="email" id="email" name="email"
+                   class="reg-input" placeholder="" required autocomplete="email"/>
+          </div>
+
+          <div class="reg-field">
+            <label class="reg-label" for="password">Password</label>
+            <input type="password" id="password" name="password"
+                   class="reg-input" placeholder="" required autocomplete="new-password"/>
+          </div>
+
+          <div class="reg-field">
+            <label class="reg-label" for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword"
+                   class="reg-input" placeholder="" required autocomplete="new-password"/>
+          </div>
+
+          <!-- Rol oculto: por defecto paciente, puedes cambiar si quieres mostrarlo -->
+          <input type="hidden" name="rol" value="paciente" />
+
+          <button type="submit" class="register-btn">
+            <span class="btn-text">Confirm</span>
+            <div class="spinner"></div>
+          </button>
+
+        </form>
+
+        <p style="text-align:center; margin-top:16px; font-size:.82rem; color:var(--gris)">
+          ¿Ya tienes cuenta? <a href="login.html" style="color:var(--verde); font-weight:500;">Inicia sesión</a>
+        </p>
+
+      </div>
+    </div>
+
+    <!-- Derecha: frase motivacional -->
+    <div class="register-quote-side">
+      <div class="register-quote">
+        <p>
+          Lo nuevo siempre<br>
+          <span class="accent">despertó<br>
+          perplejidad</span><br>
+          y resistencia.
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ══ FOOTER ══ -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">
+            <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+              <rect width="36" height="36" rx="10" fill="#5BAF7A" opacity=".3"/>
+              <path d="M12 24V14l6 7 6-7v10" stroke="#C8EDD8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="18" cy="11" r="2.5" fill="#C8EDD8"/>
+            </svg>
+            <div>
+              <strong>COPAS</strong>
+              <span>Orientación & Apoyo</span>
+            </div>
+          </div>
+          <p class="footer-desc">Espacio dedicado a la orientación, apoyo y transformación social.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Centro</h4>
+          <a href="#">Nuestro Equipo</a>
+          <a href="#">Infraestructura</a>
+          <a href="#">Ética Profesional</a>
+        </div>
+        <div class="footer-col">
+          <h4>Soporte</h4>
+          <a href="#">Contacto</a>
+          <a href="#">Emergencias</a>
+        </div>
+        <div class="footer-col">
+          <h4>Centro</h4>
+          <a href="login.html">Iniciar sesión</a>
+          <a href="register.html">Registrarse</a>
+        </div>
+      </div>
+      <div class="footer-bottom">© 2024 COPAS — Todos los derechos reservados.</div>
+    </div>
+  </footer>
+
+  <script>
+    const API = 'http://localhost/noxum/backend/api';
+
+    async function apiFetch(url, opts = {}) {
+      try {
+        const res = await fetch(url, {
+          ...opts,
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) }
+        });
+        const data = await res.json().catch(() => ({}));
+        return { ok: res.ok, data };
+      } catch(e) {
+        return { ok: false, data: { errors: ['No se pudo conectar con el servidor.'] } };
+      }
+    }
+
+    function showAlert(type, messages) {
+      const el = document.getElementById('authAlert');
+      el.className = `auth-alert alert-${type} visible`;
+      el.innerHTML = Array.isArray(messages) ? messages.join('<br>') : messages;
+    }
+
+    function hideAlert() {
+      const el = document.getElementById('authAlert');
+      el.className = 'auth-alert';
+      el.textContent = '';
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAlert();
+
+      const btn      = e.target.querySelector('.register-btn');
+      const nombre   = e.target.nombre.value.trim();
+      const apellido = e.target.apellido.value.trim();
+      const email    = e.target.email.value.trim().toLowerCase();
+      const password = e.target.password.value;
+      const confirm  = e.target.confirmPassword.value;
+      const rol      = e.target.rol.value;
+
+      if (password !== confirm) {
+        return showAlert('error', 'Las contraseñas no coinciden.');
+      }
+      if (password.length < 8) {
+        return showAlert('error', 'La contraseña debe tener al menos 8 caracteres.');
+      }
+
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      const { ok, data } = await apiFetch(`${API}/register.php`, {
+        method: 'POST',
+        body: JSON.stringify({
+          nombre: `${nombre} ${apellido}`.trim(),
+          email,
+          password,
+          rol
+        })
+      });
+
+      if (ok && data.ok) {
+        showAlert('success', '¡Cuenta creada! Redirigiendo al login...');
+        setTimeout(() => window.location.replace('login.html'), 1200);
+      } else {
+        showAlert('error', data.errors || [data.mensaje] || ['Error al crear la cuenta.']);
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    });
+  </script>
+
+</body>
+</html>

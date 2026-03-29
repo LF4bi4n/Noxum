@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — COPAS Admin</title>
+  <link rel="stylesheet" href="css/dashboard.css"/>
+  <style>
+    /*  CSS vars para modal cita  */
+    :root {
+      --green-mid:  #2D8A50;
+      --green-pale: #D1FAE5;
+      --gray-50:    #F8FAFC;
+      --gray-100:   #F1F5F9;
+      --gray-200:   #E2E8F0;
+      --gray-400:   #94A3B8;
+      --gray-600:   #475569;
+      --gray-800:   #1E293B;
+      --white:      #FFFFFF;
+      --shadow-lg:  0 12px 40px rgba(0,0,0,.15);
+    }
+    /*  Modal Cita  */
+    #modalAgendarCitaAdmin { position:fixed; inset:0; background:rgba(15,23,42,.55); backdrop-filter:blur(4px); z-index:200; display:none; align-items:center; justify-content:center; }
+    #modalAgendarCitaAdmin.open { display:flex; }
+    #modalHorariosDoctor.open { display:flex !important; }
+    .modal-cita { background:var(--white); border-radius:18px; padding:32px; width:640px; max-width:95vw; max-height:88vh; overflow-y:auto; box-shadow:var(--shadow-lg); position:relative; }
+    .modal-cita .modal-title { font-size:1.1rem; font-weight:800; color:var(--gray-800); margin-bottom:4px; }
+    .modal-cita .modal-sub { font-size:.82rem; color:var(--gray-400); margin-bottom:24px; }
+    .modal-cita .modal-close { position:absolute; top:20px; right:20px; width:32px; height:32px; border-radius:50%; border:none; background:var(--gray-100); cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--gray-600); transition:all .15s; }
+    .modal-cita .modal-close:hover { background:var(--gray-200); }
+    /* Form styles */
+    .form-label { font-size:.72rem; font-weight:700; color:var(--gray-600); text-transform:uppercase; letter-spacing:.06em; display:block; margin-bottom:6px; }
+    .form-select, .form-textarea { border:1.5px solid var(--gray-200); border-radius:9px; padding:10px 14px; font-family:'Inter',sans-serif; font-size:.85rem; color:var(--gray-800); outline:none; transition:border-color .18s; background:var(--white); width:100%; box-sizing:border-box; }
+    .form-select:focus, .form-textarea:focus { border-color:var(--green-mid); box-shadow:0 0 0 3px rgba(45,138,80,.08); }
+    .form-textarea { resize:vertical; min-height:80px; }
+    /* Horarios tipo-btn */
+    .tipo-btn { flex:1; padding:9px 0; border:2px solid var(--gray-200); border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--gray-400); background:var(--white); transition:all .18s; text-align:center; }
+    .tipo-btn.selected { border-color:var(--green-mid); color:var(--green-mid); background:var(--green-pale); }
+    /* Mini cal */
+    .mini-cal-wrap { border:1.5px solid var(--gray-200); border-radius:12px; padding:14px; }
+    .mini-cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .mini-cal-month { font-size:.78rem; font-weight:700; color:var(--gray-800); }
+    .mini-cal-nav-btn { background:none; border:none; cursor:pointer; color:var(--gray-400); padding:3px; border-radius:5px; display:flex; }
+    .mini-cal-nav-btn:hover { background:var(--gray-100); }
+    .mini-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; text-align:center; }
+    .mini-cal-dow { font-size:.6rem; font-weight:700; color:var(--gray-400); padding:3px 0; text-transform:uppercase; }
+    .mini-cal-day { font-size:.76rem; padding:6px 2px; border-radius:6px; cursor:pointer; color:var(--gray-600); transition:all .15s; }
+    .mini-cal-day:hover { background:var(--gray-100); }
+    .mini-cal-day.selected { background:var(--green-mid); color:#fff; font-weight:700; }
+    .mini-cal-day.today-mark { font-weight:700; color:var(--green-mid); }
+    .mini-cal-day.disabled { color:var(--gray-200); pointer-events:none; }
+    .mini-cal-day.empty { pointer-events:none; }
+    /* Form actions */
+    .form-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:24px; }
+    .btn-cancel { padding:10px 20px; border-radius:9px; border:1.5px solid var(--gray-200); background:var(--white); color:var(--gray-600); font-family:'Inter',sans-serif; font-size:.78rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; cursor:pointer; transition:all .18s; }
+    .btn-cancel:hover { background:var(--gray-100); }
+    /*  Modal Agregar Doctor  */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:#fff; border-radius:16px; padding:32px; width:100%; max-width:420px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+    .modal-box h3 { margin:0 0 20px; font-size:1.1rem; color:#111827; }
+    .modal-box .modal-close { position:absolute; top:16px; right:16px; background:none; border:none; cursor:pointer; color:#6B7280; }
+    .mfield { margin-bottom:14px; }
+    .mfield label { display:block; font-size:.78rem; font-weight:600; color:#374151; margin-bottom:5px; }
+    .mfield input, .mfield select { width:100%; padding:9px 12px; border:1.5px solid #E5E7EB; border-radius:8px; font-size:.85rem; outline:none; box-sizing:border-box; transition:border .15s; }
+    .mfield input:focus, .mfield select:focus { border-color:#2D7A4F; }
+    .mfield-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .btn-modal-submit { width:100%; padding:11px; background:#2D7A4F; color:#fff; border:none; border-radius:9px; font-size:.88rem; font-weight:700; cursor:pointer; margin-top:6px; transition:background .15s; }
+    .btn-modal-submit:hover { background:#245f3e; }
+    .btn-modal-submit:disabled { background:#9CA3AF; cursor:not-allowed; }
+    .modal-alert { padding:9px 12px; border-radius:8px; font-size:.8rem; margin-bottom:12px; display:none; }
+    .modal-alert.error   { background:#FEE2E2; color:#B91C1C; display:block; }
+    .modal-alert.success { background:#D1FAE5; color:#065F46; display:block; }
+
+    /*  Toast  */
+    .toast { position:fixed; bottom:24px; right:24px; background:#1F2937; color:#fff; padding:12px 20px; border-radius:10px; font-size:.85rem; opacity:0; transform:translateY(10px); transition:all .25s; z-index:9999; pointer-events:none; }
+    .toast.show { opacity:1; transform:translateY(0); }
+  </style>
+</head>
+<!-- PROTECCIÓN DE ROL: solo recepcionistas/admin pueden entrar aquí -->
+<script src="js/guard.js" data-rol="recepcionista"></script>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="img/logocompas.jpeg" alt="COPAS" style="width:32px;height:32px;object-fit:contain;border-radius:6px;">
+      <div class="sidebar-brand-text">
+        <strong>COPAS</strong>
+        <span>Orientación & Apoyo</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="sidebar-link active" data-page="inicio">
+        <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        Dashboard
+      </button>
+      <button class="sidebar-link" data-page="doctores">
+        <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Doctores
+      </button>
+      <button class="sidebar-link" data-page="pacientes">
+        <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        Pacientes
+      </button>
+      <button class="sidebar-link" data-page="citas">
+        <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        Citas
+      </button>
+    </nav>
+
+    <div class="sidebar-logout">
+      <button class="sidebar-link" id="btnLogout">
+        <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        Cerrar Sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-wrap">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-search">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#9CA3AF" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" placeholder="Buscar..."/>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-notif" id="btnNotif">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+          <span class="notif-badge" id="notifBadge" style="display:none"></span>
+        </div>
+
+        <!-- Panel notificaciones -->
+        <div id="notifPanel" style="display:none; position:absolute; top:54px; right:60px; width:320px; background:#fff;
+             border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,.15); z-index:500; overflow:hidden; border:1px solid #E5E7EB;">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid #F3F4F6;">
+            <span style="font-weight:700; font-size:.9rem; color:#111827;">Notificaciones</span>
+            <button id="btnLeerTodas" style="font-size:.72rem; color:#2D7A4F; background:none; border:none; cursor:pointer; font-weight:600;">Marcar todas leídas</button>
+          </div>
+          <div id="notifList" style="max-height:340px; overflow-y:auto;"></div>
+        </div>
+
+        <div class="topbar-avatar" id="topbarAvatar">A</div>
+      </div>
+    </header>
+
+    <!-- PAGE: DASHBOARD -->
+    <main class="page active" id="page-inicio">
+      <div class="page-content">
+        <div class="dash-hero">
+          <div class="dash-hero-left">
+            <p class="dash-hero-greeting">Buenos días, <strong id="heroNombre">ADMIN!</strong></p>
+            <p class="dash-hero-sub" id="heroCitas">Cargando citas...</p>
+            <div class="dash-hero-actions">
+              <button class="hero-btn hero-btn-secondary" id="btnAgregarDoctor">
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                AGREGAR DOCTOR
+              </button>
+            </div>
+          </div>
+          <img src="img/admin.png" alt="Admin" class="dash-hero-img" onerror="this.style.display='none'"/>
+        </div>
+
+        <div class="dash-grid">
+          <!-- Patient List -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <span class="dash-card-title">Pacientes recientes</span>
+            </div>
+            <div id="patientList">
+              <div style="text-align:center;padding:20px;color:#9CA3AF;font-size:.85rem;">Cargando...</div>
+            </div>
+          </div>
+
+          <!-- Calendar -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <span class="dash-card-title">Calendario</span>
+            </div>
+            <div class="calendar-nav">
+              <button class="cal-nav-btn" id="calPrev">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+              </button>
+              <span class="cal-month" id="calMonth"></span>
+              <button class="cal-nav-btn" id="calNext">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+            <div class="upcoming-section">
+              <div class="upcoming-header">
+                <span class="upcoming-title">Próximas citas</span>
+              </div>
+              <div id="upcomingList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- PAGE: DOCTORES -->
+    <main class="page" id="page-doctores">
+      <div class="page-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <h2 style="font-size:1.1rem;color:#111827;margin:0;">Doctores registrados</h2>
+          <button class="hero-btn hero-btn-secondary" id="btnAgregarDoctorPag">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            Agregar Doctor
+          </button>
+        </div>
+        <div id="listaDoctores">
+          <div style="text-align:center;padding:20px;color:#9CA3AF;font-size:.85rem;">Cargando...</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- PAGE: PACIENTES -->
+    <main class="page" id="page-pacientes">
+      <div class="page-content">
+        <h2 style="font-size:1.1rem;color:#111827;margin:0 0 20px;">Pacientes registrados</h2>
+        <div id="listaPacientes">
+          <div style="text-align:center;padding:20px;color:#9CA3AF;font-size:.85rem;">Cargando...</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- PAGE: CITAS -->
+    <main class="page" id="page-citas">
+      <div class="page-content">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+          <div>
+            <h2 style="font-size:1.1rem;color:#111827;margin:0 0 4px;">Gestión de Citas</h2>
+            <p style="font-size:.8rem;color:#6B7280;margin:0;">Agenda y administra las citas del sistema</p>
+          </div>
+          <button class="btn-modal-submit" style="width:auto;padding:10px 20px;margin:0;display:flex;align-items:center;gap:8px;" id="btnNuevaCitaAdmin">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            Nueva Cita
+          </button>
+        </div>
+        <div id="listaCitasAdmin">
+          <div style="text-align:center;padding:20px;color:#9CA3AF;font-size:.85rem;">Cargando...</div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- MODAL: AGENDAR CITA (Admin) -->
+  <div id="modalAgendarCitaAdmin">
+    <div class="modal-cita">
+      <button class="modal-close" id="btnCerrarModalCita">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      <div class="modal-title">Agendar Cita</div>
+      <div class="modal-sub">Selecciona paciente, especialista, fecha y horario</div>
+
+      <div style="margin-bottom:16px;">
+        <label class="form-label">Paciente</label>
+        <select class="form-select" id="citaPacienteAdmin">
+          <option value="">-- Seleccionar paciente --</option>
+        </select>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:22px;">
+        <div>
+          <div class="form-label" style="margin-bottom:8px">Especialista</div>
+          <select class="form-select" id="citaDoctorAdmin" onchange="adminRenderHorarios()">
+            <option value="">-- Seleccionar --</option>
+          </select>
+
+          <div class="form-label" style="margin-top:16px; margin-bottom:8px">Horario</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;" id="horariosGridAdmin"></div>
+
+          <div style="margin-top:16px">
+            <div class="form-label" style="margin-bottom:8px">Notas (opcional)</div>
+            <textarea class="form-textarea" id="citaNotasAdmin" placeholder="Motivo de la consulta..."></textarea>
+          </div>
+        </div>
+
+        <div>
+          <div class="form-label" style="margin-bottom:8px">Fecha</div>
+          <div class="mini-cal-wrap">
+            <div class="mini-cal-nav">
+              <button class="mini-cal-nav-btn" id="adminMiniCalPrev">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+              </button>
+              <span class="mini-cal-month" id="adminMiniCalMonth"></span>
+              <button class="mini-cal-nav-btn" id="adminMiniCalNext">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+            <div class="mini-cal-grid" id="adminMiniCalGrid"></div>
+          </div>
+          <div id="adminFechaSelLabel" style="margin-top:10px; font-size:.78rem; color:#2D8A50; font-weight:600; min-height:20px; text-align:center;"></div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-cancel" id="btnCancelarModalCita">Cancelar</button>
+        <button class="btn btn-primary" id="btnGuardarCitaAdmin" style="background:#2D7A4F;color:#fff;padding:10px 24px;border:none;border-radius:9px;font-size:.85rem;font-weight:700;cursor:pointer;">Agendar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: HORARIOS DOCTOR (Admin) -->
+  <div id="modalHorariosDoctor" style="position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);z-index:300;display:none;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:18px;padding:28px 32px;width:700px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.18);position:relative;">
+      <button onclick="document.getElementById('modalHorariosDoctor').classList.remove('open');document.getElementById('modalHorariosDoctor').style.display='none';"
+        style="position:absolute;top:18px;right:18px;width:32px;height:32px;border-radius:50%;border:none;background:#F1F5F9;cursor:pointer;font-size:1rem;color:#64748B;"></button>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-size:1.05rem;font-weight:800;color:#111827;">Horario semanal</div>
+        <div style="font-size:.82rem;color:#9CA3AF;" id="horariosDoctorNombre"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <!-- Form -->
+        <div style="background:#F9FAFB;border-radius:12px;padding:18px;">
+          <div style="font-size:.85rem;font-weight:700;color:#374151;margin-bottom:14px;">Agregar / Editar día</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div>
+              <label style="font-size:.78rem;color:#6B7280;display:block;margin-bottom:5px;">Día de la semana</label>
+              <select id="horAdminDia" style="width:100%;padding:8px 10px;border:1px solid #E5E7EB;border-radius:7px;font-size:.83rem;color:#374151;background:#fff;">
+                <option value="">— Seleccionar —</option>
+                <option value="lunes">Lunes</option>
+                <option value="martes">Martes</option>
+                <option value="miercoles">Miércoles</option>
+                <option value="jueves">Jueves</option>
+                <option value="viernes">Viernes</option>
+                <option value="sabado">Sábado</option>
+                <option value="domingo">Domingo</option>
+              </select>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div>
+                <label style="font-size:.78rem;color:#6B7280;display:block;margin-bottom:5px;">Hora inicio</label>
+                <input type="time" id="horAdminInicio" value="09:00"
+                  style="width:100%;padding:8px 10px;border:1px solid #E5E7EB;border-radius:7px;font-size:.83rem;color:#374151;background:#fff;">
+              </div>
+              <div>
+                <label style="font-size:.78rem;color:#6B7280;display:block;margin-bottom:5px;">Hora fin</label>
+                <input type="time" id="horAdminFin" value="17:00"
+                  style="width:100%;padding:8px 10px;border:1px solid #E5E7EB;border-radius:7px;font-size:.83rem;color:#374151;background:#fff;">
+              </div>
+            </div>
+            <button id="btnGuardarHorarioAdmin"
+              style="padding:9px;background:#2D7A4F;color:#fff;border:none;border-radius:8px;font-size:.83rem;font-weight:700;cursor:pointer;">
+               Guardar horario
+            </button>
+            <p style="font-size:.72rem;color:#9CA3AF;margin:0;">Se crea 1 slot por hora entre inicio y fin.</p>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="font-size:.85rem;font-weight:700;color:#374151;">Horarios configurados</span>
+            <span style="font-size:.75rem;color:#9CA3AF;" id="horariosAdminCnt">0 días</span>
+          </div>
+          <div id="horariosAdminTableWrap">
+            <div style="text-align:center;padding:20px;color:#9CA3AF;font-size:.83rem;">Cargando…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AGREGAR DOCTOR / RECEPCIONISTA -->
+  <div class="modal-overlay" id="modalAgregarDoctor">
+    <div class="modal-box">
+      <button class="modal-close" id="btnCerrarModalDoctor">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      <h3>Agregar usuario del equipo</h3>
+      <div class="modal-alert" id="alertDoctor"></div>
+      <div class="mfield">
+        <label>Nombre completo</label>
+        <input type="text" id="docNombre" placeholder="Ej: Dra. Laura González"/>
+      </div>
+      <div class="mfield">
+        <label>Email</label>
+        <input type="email" id="docEmail" placeholder="correo@noxum.com"/>
+      </div>
+      <div class="mfield-row">
+        <div class="mfield">
+          <label>Contraseña</label>
+          <input type="password" id="docPassword" placeholder="Mínimo 8 caracteres"/>
+        </div>
+        <div class="mfield">
+          <label>Rol</label>
+          <select id="docRol">
+            <option value="doctor">Doctor</option>
+            <option value="recepcionista">Recepcionista</option>
+          </select>
+        </div>
+      </div>
+      <div class="mfield" id="campoEspecialidad">
+        <label>Especialidad</label>
+        <input type="text" id="docEspecialidad" placeholder="Ej: Psicología Clínica"/>
+      </div>
+      <button class="btn-modal-submit" id="btnGuardarDoctor">Crear usuario</button>
+    </div>
+  </div>
+
+  <!-- MODAL PERFIL -->
+  <div class="modal-overlay" id="modalPerfil">
+    <div class="modal-perfil">
+      <button class="modal-perfil-close" id="btnCerrarPerfil">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      <div class="modal-perfil-avatar" id="modalAvatar">A</div>
+      <div class="modal-perfil-nombre" id="modalNombre">Admin</div>
+      <button class="modal-perfil-logout" id="btnLogoutModal">CERRAR SESIÓN</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<script>
+const API = 'http://localhost/noxum/backend/api';
+
+async function apiFetch(url, opts = {}) {
+  try {
+    const res = await fetch(url, {
+      ...opts,
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) }
+    });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, status: res.status, data };
+  } catch(e) {
+    return { ok: false, status: 0, data: { error: 'Sin conexión' } };
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+//  Inicializar 
+let usuarioActual = null;
+(async () => {
+  const { ok, data } = await apiFetch(`${API}/login.php?check`);
+  if (!ok) { window.location.replace('login.html'); return; }
+
+  usuarioActual = data.usuario;
+  const nombre = usuarioActual.nombre;
+  document.getElementById('heroNombre').textContent = nombre + '!';
+  document.getElementById('topbarAvatar').textContent = nombre.charAt(0).toUpperCase();
+  document.getElementById('modalAvatar').textContent  = nombre.charAt(0).toUpperCase();
+  document.getElementById('modalNombre').textContent  = nombre;
+
+  await Promise.all([cargarCitas(), cargarPacientesYCitas()]);
+  renderCalendar(calYear, calMonth);
+})();
+
+//  Logout 
+async function doLogout() {
+  await apiFetch(`${API}/login.php?logout`, { method: 'POST' });
+  sessionStorage.clear();
+  window.location.replace('login.html');
+}
+document.getElementById('btnLogout').addEventListener('click', doLogout);
+document.getElementById('btnLogoutModal').addEventListener('click', doLogout);
+
+//  Modal perfil 
+document.getElementById('topbarAvatar').addEventListener('click', () => {
+  document.getElementById('modalPerfil').classList.add('open');
+});
+document.getElementById('btnCerrarPerfil').addEventListener('click', () => {
+  document.getElementById('modalPerfil').classList.remove('open');
+});
+document.getElementById('modalPerfil').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalPerfil'))
+    document.getElementById('modalPerfil').classList.remove('open');
+});
+
+//  Navegación sidebar 
+document.querySelectorAll('.sidebar-link[data-page]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + btn.dataset.page).classList.add('active');
+
+    // Cargar datos al cambiar de página
+    if (btn.dataset.page === 'doctores') cargarDoctores();
+    if (btn.dataset.page === 'pacientes') cargarPacientesLista();
+    if (btn.dataset.page === 'citas') cargarCitasAdmin();
+  });
+});
+
+//  Citas de hoy 
+async function cargarCitas() {
+  const { ok, data } = await apiFetch(`${API}/citas.php?hoy=1`);
+  const total = ok ? (data.total ?? 0) : 0;
+  document.getElementById('heroCitas').textContent = `Hay ${total} citas programadas hoy`;
+}
+
+//  Pacientes + Calendario 
+let citasPorFecha = {};
+
+async function cargarPacientesYCitas() {
+  const colors = ['#2D7A4F','#3B82F6','#8B5CF6','#F59E0B','#EF4444','#06B6D4'];
+  try {
+    const { ok: okP, data: dataP } = await apiFetch(`${API}/pacientes.php`);
+    const pacientes = okP ? (dataP.pacientes || []) : [];
+
+    const { ok: okC, data: dataC } = await apiFetch(`${API}/citas.php`);
+    const todasCitas = okC ? (dataC.citas || []) : [];
+
+    citasPorFecha = {};
+    todasCitas.forEach(c => {
+      if (!citasPorFecha[c.fecha]) citasPorFecha[c.fecha] = [];
+      citasPorFecha[c.fecha].push(c);
+    });
+    renderCalendar(calYear, calMonth);
+
+    // Lista de pacientes
+    if (pacientes.length === 0) {
+      document.getElementById('patientList').innerHTML =
+        '<p style="color:#9CA3AF;font-size:.85rem;text-align:center;padding:16px">Sin pacientes registrados</p>';
+    } else {
+      document.getElementById('patientList').innerHTML = pacientes.slice(0,5).map((p,i) => {
+        const ini = p.nombre.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+        return `
+          <div class="patient-item">
+            <div class="patient-avatar" style="background:${colors[i%colors.length]}">${ini}</div>
+            <div class="patient-info">
+              <div class="patient-name">${p.nombre}</div>
+              <div class="patient-type">${p.ultimo_estado || 'Paciente'}</div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // Próximas citas
+    const proximas = todasCitas
+      .filter(c => c.estado === 'agendada' && c.fecha >= new Date().toISOString().split('T')[0])
+      .slice(0,3);
+
+    document.getElementById('upcomingList').innerHTML = proximas.length > 0
+      ? proximas.map(c => {
+          const ini   = (c.paciente_nombre||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+          const fecha = new Date(c.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+          return `
+            <div class="upcoming-item">
+              <div class="upcoming-dot">${ini}</div>
+              <div class="upcoming-info">
+                <div class="upcoming-name">${c.paciente_nombre}</div>
+                <div class="upcoming-date">${fecha} | ${c.hora ? c.hora.slice(0,5) : ''}</div>
+              </div>
+            </div>`;
+        }).join('')
+      : '<p style="color:#9CA3AF;font-size:.82rem;text-align:center;padding:12px">Sin próximas citas</p>';
+
+  } catch {
+    document.getElementById('patientList').innerHTML =
+      '<p style="color:#EF4444;font-size:.85rem;text-align:center;padding:16px">Error al cargar datos</p>';
+  }
+}
+
+//  Lista de doctores 
+async function cargarDoctores() {
+  const { ok, data } = await apiFetch(`${API}/especialistas.php`);
+  const doctores = ok ? (data.especialistas || data.doctores || []) : [];
+
+  if (doctores.length === 0) {
+    document.getElementById('listaDoctores').innerHTML =
+      '<p style="color:#9CA3AF;font-size:.85rem;text-align:center;padding:20px">Sin doctores registrados</p>';
+    return;
+  }
+
+  const colors = ['#2D7A4F','#3B82F6','#8B5CF6','#F59E0B'];
+  document.getElementById('listaDoctores').innerHTML = doctores.map((d,i) => {
+    const ini = (d.nombre||'D').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const idDoc = d.id_doctor || d.id_usuario;
+    return `
+      <div class="patient-item" style="flex-wrap:wrap;gap:8px;">
+        <div class="patient-avatar" style="background:${colors[i%colors.length]}">${ini}</div>
+        <div class="patient-info" style="flex:1;">
+          <div class="patient-name">${d.nombre}</div>
+          <div class="patient-type">${d.especialidad || 'Doctor'}</div>
+        </div>
+        <span style="font-size:.72rem;color:#9CA3AF;margin-right:8px;">${d.email||''}</span>
+        <button class="btn-horario-doctor" data-id="${idDoc}" data-nombre="${d.nombre}"
+          style="padding:5px 12px;font-size:.75rem;border:1px solid #D1FAE5;border-radius:7px;
+                 background:#F0FDF4;color:#2D7A4F;cursor:pointer;white-space:nowrap;font-weight:600;">
+          Horarios
+        </button>
+      </div>`;
+  }).join('');
+
+  document.querySelectorAll('.btn-horario-doctor').forEach(btn => {
+    btn.addEventListener('click', () => abrirHorariosDoctor(btn.dataset.id, btn.dataset.nombre));
+  });
+}
+
+//  Panel horarios de un doctor (Admin) 
+const ADMIN_DIAS_LABEL = {
+  lunes:'Lunes', martes:'Martes', miercoles:'Miércoles',
+  jueves:'Jueves', viernes:'Viernes', sabado:'Sábado', domingo:'Domingo'
+};
+const ADMIN_DIAS_ORDER = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
+let horarioDoctorId = null;
+
+async function abrirHorariosDoctor(idDoctor, nombre) {
+  horarioDoctorId = idDoctor;
+  document.getElementById('horariosDoctorNombre').textContent = nombre;
+  document.getElementById('horAdminDia').value    = '';
+  document.getElementById('horAdminInicio').value = '09:00';
+  document.getElementById('horAdminFin').value    = '17:00';
+  document.getElementById('modalHorariosDoctor').classList.add('open');
+  cargarHorariosAdminDoctor();
+}
+
+async function cargarHorariosAdminDoctor() {
+  const wrap = document.getElementById('horariosAdminTableWrap');
+  wrap.innerHTML = '<div style="text-align:center;padding:20px;color:#9CA3AF;font-size:.83rem;">Cargando…</div>';
+  const { ok, data } = await apiFetch(`${API}/horarios.php?id_doctor=${horarioDoctorId}`);
+  const horarios = ok ? (data.horarios || []) : [];
+  document.getElementById('horariosAdminCnt').textContent = `${horarios.length} día${horarios.length!==1?'s':''}`;
+
+  if (!horarios.length) {
+    wrap.innerHTML = '<div style="text-align:center;padding:20px;color:#9CA3AF;font-size:.83rem;">Sin horarios configurados.</div>';
+    return;
+  }
+
+  const sorted = [...horarios].sort((a,b) => ADMIN_DIAS_ORDER.indexOf(a.dia_semana) - ADMIN_DIAS_ORDER.indexOf(b.dia_semana));
+  wrap.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:.82rem;">
+      <thead>
+        <tr style="color:#9CA3AF;text-align:left;">
+          <th style="padding:5px 8px;">Día</th>
+          <th style="padding:5px 8px;">Inicio</th>
+          <th style="padding:5px 8px;">Fin</th>
+          <th style="padding:5px 8px;text-align:center;">Slots</th>
+          <th style="padding:5px 8px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${sorted.map(h => {
+          const [hi] = h.hora_inicio.split(':').map(Number);
+          const [hf] = h.hora_fin.split(':').map(Number);
+          const slots = Math.max(0, hf - hi);
+          return `<tr style="border-top:1px solid #F3F4F6;">
+            <td style="padding:7px 8px;font-weight:600;color:#374151;">${ADMIN_DIAS_LABEL[h.dia_semana]||h.dia_semana}</td>
+            <td style="padding:7px 8px;color:#6B7280;">${h.hora_inicio}</td>
+            <td style="padding:7px 8px;color:#6B7280;">${h.hora_fin}</td>
+            <td style="padding:7px 8px;text-align:center;color:#2D7A4F;font-weight:600;">${slots}h</td>
+            <td style="padding:7px 4px;text-align:right;">
+              <button data-edit-id="${h.id_horario}" data-dia="${h.dia_semana}" data-ini="${h.hora_inicio}" data-fin="${h.hora_fin}"
+                style="padding:3px 9px;font-size:.73rem;border:1px solid #D1D5DB;border-radius:5px;background:#fff;cursor:pointer;margin-right:4px;">Editar</button>
+              <button data-del-id="${h.id_horario}"
+                style="padding:3px 9px;font-size:.73rem;border:1px solid #FECACA;border-radius:5px;background:#FEF2F2;color:#EF4444;cursor:pointer;">Eliminar</button>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+
+  wrap.querySelectorAll('[data-edit-id]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('horAdminDia').value    = btn.dataset.dia;
+      document.getElementById('horAdminInicio').value = btn.dataset.ini;
+      document.getElementById('horAdminFin').value    = btn.dataset.fin;
+    });
+  });
+
+  wrap.querySelectorAll('[data-del-id]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('¿Eliminar este horario?')) return;
+      const { ok } = await apiFetch(`${API}/horarios.php?id_doctor=${horarioDoctorId}&id=${btn.dataset.delId}`, { method: 'DELETE' });
+      if (ok) { showToast('Horario eliminado'); cargarHorariosAdminDoctor(); }
+      else showToast(' Error al eliminar');
+    });
+  });
+}
+
+//  Lista de pacientes 
+async function cargarPacientesLista() {
+  const { ok, data } = await apiFetch(`${API}/pacientes.php`);
+  const pacientes = ok ? (data.pacientes || []) : [];
+  const colors = ['#2D7A4F','#3B82F6','#8B5CF6','#F59E0B','#EF4444','#06B6D4'];
+
+  if (pacientes.length === 0) {
+    document.getElementById('listaPacientes').innerHTML =
+      '<p style="color:#9CA3AF;font-size:.85rem;text-align:center;padding:20px">Sin pacientes registrados</p>';
+    return;
+  }
+
+  document.getElementById('listaPacientes').innerHTML = pacientes.map((p,i) => {
+    const ini = p.nombre.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    return `
+      <div class="patient-item">
+        <div class="patient-avatar" style="background:${colors[i%colors.length]}">${ini}</div>
+        <div class="patient-info">
+          <div class="patient-name">${p.nombre}</div>
+          <div class="patient-type">${p.email || ''}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+//  Modal Agregar Doctor 
+function abrirModalDoctor() {
+  document.getElementById('alertDoctor').className = 'modal-alert';
+  document.getElementById('alertDoctor').textContent = '';
+  document.getElementById('docNombre').value = '';
+  document.getElementById('docEmail').value = '';
+  document.getElementById('docPassword').value = '';
+  document.getElementById('docRol').value = 'doctor';
+  document.getElementById('docEspecialidad').value = '';
+  document.getElementById('campoEspecialidad').style.display = 'block';
+  document.getElementById('modalAgregarDoctor').classList.add('open');
+}
+
+// Mostrar/ocultar campo especialidad según el rol
+document.getElementById('docRol').addEventListener('change', function() {
+  document.getElementById('campoEspecialidad').style.display =
+    this.value === 'doctor' ? 'block' : 'none';
+});
+
+document.getElementById('btnAgregarDoctor').addEventListener('click', abrirModalDoctor);
+document.getElementById('btnAgregarDoctorPag').addEventListener('click', abrirModalDoctor);
+document.getElementById('btnCerrarModalDoctor').addEventListener('click', () => {
+  document.getElementById('modalAgregarDoctor').classList.remove('open');
+});
+document.getElementById('modalAgregarDoctor').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalAgregarDoctor'))
+    document.getElementById('modalAgregarDoctor').classList.remove('open');
+});
+
+document.getElementById('btnGuardarDoctor').addEventListener('click', async () => {
+  const nombre      = document.getElementById('docNombre').value.trim();
+  const email       = document.getElementById('docEmail').value.trim();
+  const password    = document.getElementById('docPassword').value;
+  const rol         = document.getElementById('docRol').value;
+  const especialidad= document.getElementById('docEspecialidad').value.trim();
+  const alertEl     = document.getElementById('alertDoctor');
+  const btn         = document.getElementById('btnGuardarDoctor');
+
+  alertEl.className = 'modal-alert';
+
+  if (!nombre || !email || !password) {
+    alertEl.className = 'modal-alert error';
+    alertEl.textContent = 'Por favor llena todos los campos.';
+    return;
+  }
+  if (password.length < 8) {
+    alertEl.className = 'modal-alert error';
+    alertEl.textContent = 'La contraseña debe tener al menos 8 caracteres.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Creando...';
+
+  const { ok, data } = await apiFetch(`${API}/setup_doctor.php`, {
+    method: 'POST',
+    body: JSON.stringify({ nombre, email, password, rol, especialidad })
+  });
+
+  btn.disabled = false;
+  btn.textContent = 'Crear usuario';
+
+  if (ok && data.ok) {
+    alertEl.className = 'modal-alert success';
+    alertEl.textContent = `${data.mensaje} — Email: ${email} | Contraseña: ${password}`;
+    showToast(`${rol === 'doctor' ? 'Doctor' : 'Recepcionista'} creado correctamente `);
+    setTimeout(() => {
+      document.getElementById('modalAgregarDoctor').classList.remove('open');
+      if (rol === 'doctor') cargarDoctores();
+    }, 2500);
+  } else {
+    alertEl.className = 'modal-alert error';
+    alertEl.textContent = (data.errors || [data.mensaje || 'Error al crear usuario']).join(', ');
+  }
+});
+
+//  Calendario 
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DIAS  = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+
+let calYear  = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+
+function renderCalendar(year, month) {
+  const hoy      = new Date();
+  const firstDay = new Date(year, month, 1).getDay();
+  const diasMes  = new Date(year, month + 1, 0).getDate();
+
+  document.getElementById('calMonth').textContent = `${MESES[month]} ${year}`;
+
+  let html = DIAS.map(d => `<div class="cal-dow">${d}</div>`).join('');
+  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
+
+  for (let d = 1; d <= diasMes; d++) {
+    const isToday  = d === hoy.getDate() && month === hoy.getMonth() && year === hoy.getFullYear();
+    const key      = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasCitas = citasPorFecha[key] && citasPorFecha[key].length > 0;
+    let cls = 'cal-day';
+    if (isToday)  cls += ' today';
+    if (hasCitas) cls += ' has-event';
+    html += `<div class="${cls}" title="${hasCitas ? citasPorFecha[key].length + ' cita(s)' : ''}">${d}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+}
+
+document.getElementById('calPrev').addEventListener('click', () => {
+  calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar(calYear, calMonth);
+});
+document.getElementById('calNext').addEventListener('click', () => {
+  calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar(calYear, calMonth);
+});
+
+//  Página Citas 
+async function cargarCitasAdmin() {
+  const { ok, data } = await apiFetch(`${API}/citas.php`);
+  const citas = ok ? (data.citas || []) : [];
+  const el = document.getElementById('listaCitasAdmin');
+
+  if (citas.length === 0) {
+    el.innerHTML = '<p style="color:#9CA3AF;font-size:.85rem;text-align:center;padding:24px">Sin citas registradas</p>';
+    return;
+  }
+
+  const estadoColor = { agendada: '#D1FAE5|#065F46', cancelada: '#FEE2E2|#B91C1C', completada: '#E0E7FF|#3730A3' };
+  el.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:.82rem;">
+      <thead>
+        <tr style="border-bottom:2px solid #E5E7EB;">
+          <th style="padding:10px 12px;text-align:left;color:#6B7280;font-weight:600;">Paciente</th>
+          <th style="padding:10px 12px;text-align:left;color:#6B7280;font-weight:600;">Doctor</th>
+          <th style="padding:10px 12px;text-align:left;color:#6B7280;font-weight:600;">Fecha</th>
+          <th style="padding:10px 12px;text-align:left;color:#6B7280;font-weight:600;">Hora</th>
+          <th style="padding:10px 12px;text-align:left;color:#6B7280;font-weight:600;">Estado</th>
+          <th style="padding:10px 12px;text-align:left;color:#6B7280;font-weight:600;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${citas.map(c => {
+          const [bg, fg] = (estadoColor[c.estado] || '#F3F4F6|#374151').split('|');
+          const fecha = new Date(c.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
+          return `
+            <tr style="border-bottom:1px solid #F3F4F6;">
+              <td style="padding:12px;color:#111827;font-weight:600;">${c.paciente_nombre || '—'}</td>
+              <td style="padding:12px;color:#374151;">${c.doctor_nombre || '—'}</td>
+              <td style="padding:12px;color:#374151;">${fecha}</td>
+              <td style="padding:12px;color:#374151;">${c.hora ? c.hora.slice(0,5) : '—'}</td>
+              <td style="padding:12px;"><span style="background:${bg};color:${fg};padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;text-transform:uppercase;">${c.estado}</span></td>
+              <td style="padding:12px;">${c.estado === 'agendada' ? `<button onclick="cancelarCitaAdmin(${c.id_cita})" style="padding:4px 12px;border-radius:7px;border:1.5px solid #EF4444;color:#EF4444;background:transparent;font-size:.68rem;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;">Cancelar</button>` : ''}</td>
+            </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+async function cancelarCitaAdmin(idCita) {
+  if (!confirm('¿Cancelar esta cita?')) return;
+  const { ok } = await apiFetch(`${API}/citas.php`, {
+    method: 'PUT',
+    body: JSON.stringify({ id_cita: idCita, estado: 'cancelada' })
+  });
+  if (ok) { showToast('Cita cancelada'); cargarCitasAdmin(); }
+  else showToast('Error al cancelar');
+}
+
+//  Modal Agendar Cita — igual que paciente/doctor 
+const ADMIN_MESES    = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const ADMIN_DIAS     = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+
+// Slots se cargan dinámicamente del API al seleccionar doctor + fecha
+let adminSlotsCache = [];
+
+let adminFechaSel = null, adminHorarioSel = null;
+let adminCalY = new Date().getFullYear(), adminCalM = new Date().getMonth();
+let pacientesCache2 = [], doctoresCache2 = [];
+
+function adminFmtDate(d) { return d.toISOString().split('T')[0]; }
+
+async function abrirModalAgendarCita() {
+  adminFechaSel = null; adminHorarioSel = null;
+  document.getElementById('adminFechaSelLabel').textContent = '';
+  adminCalY = new Date().getFullYear(); adminCalM = new Date().getMonth();
+
+  // Cargar pacientes — ?todos=1 para traer todos (no solo los del doctor)
+  if (!pacientesCache2.length) {
+    const { ok, data } = await apiFetch(`${API}/pacientes.php?todos=1`);
+    pacientesCache2 = ok ? (data.pacientes || []) : [];
+  }
+  const selP = document.getElementById('citaPacienteAdmin');
+  selP.innerHTML = '<option value="">-- Seleccionar paciente --</option>' +
+    pacientesCache2.map(p => `<option value="${p.id_paciente}">${p.nombre}</option>`).join('');
+
+  // Cargar doctores
+  if (!doctoresCache2.length) {
+    const { ok, data } = await apiFetch(`${API}/especialistas.php`);
+    doctoresCache2 = ok ? (data.especialistas || data.doctores || []) : [];
+  }
+  const selD = document.getElementById('citaDoctorAdmin');
+  selD.innerHTML = '<option value="">-- Seleccionar --</option>' +
+    doctoresCache2.map(d => `<option value="${d.id_doctor||d.id_usuario}">${d.nombre}${d.especialidad ? ' — '+d.especialidad : ''}</option>`).join('');
+
+  document.getElementById('citaNotasAdmin').value = '';
+  adminRenderMiniCal(adminCalY, adminCalM);
+  adminRenderHorarios();
+  document.getElementById('modalAgendarCitaAdmin').classList.add('open');
+}
+
+function adminRenderMiniCal(y, m) {
+  const hoyD = new Date();
+  const firstDay = new Date(y, m, 1).getDay();
+  const diasMes  = new Date(y, m+1, 0).getDate();
+  document.getElementById('adminMiniCalMonth').textContent = `${ADMIN_MESES[m].slice(0,3)} ${y}`;
+  let html = ADMIN_DIAS.map(d=>`<div class="mini-cal-dow">${d.slice(0,1)}</div>`).join('');
+  for(let i=0;i<firstDay;i++) html += `<div class="mini-cal-day empty"></div>`;
+  for(let d=1;d<=diasMes;d++) {
+    const key = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dDate = new Date(y,m,d);
+    const isPast = dDate < new Date(hoyD.getFullYear(),hoyD.getMonth(),hoyD.getDate());
+    const esFin  = dDate.getDay()===0 || dDate.getDay()===6;
+    let cls = 'mini-cal-day';
+    if(isPast||esFin) cls += ' disabled';
+    if(key===adminFmtDate(hoyD)) cls += ' today-mark';
+    if(key===adminFechaSel) cls += ' selected';
+    html += `<div class="${cls}" data-key="${key}">${d}</div>`;
+  }
+  document.getElementById('adminMiniCalGrid').innerHTML = html;
+  document.querySelectorAll('#adminMiniCalGrid .mini-cal-day:not(.disabled):not(.empty)').forEach(cell => {
+    cell.addEventListener('click', () => {
+      adminFechaSel = cell.dataset.key;
+      adminHorarioSel = null;
+      const f = new Date(adminFechaSel+'T12:00:00').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+      document.getElementById('adminFechaSelLabel').textContent = ' ' + f;
+      adminRenderMiniCal(adminCalY, adminCalM);
+      adminRenderHorarios();
+    });
+  });
+}
+
+async function adminRenderHorarios() {
+  const grid = document.getElementById('horariosGridAdmin');
+  const idDoctor = document.getElementById('citaDoctorAdmin').value;
+  if (!adminFechaSel || !idDoctor) {
+    grid.innerHTML = '<p style="color:#9CA3AF;font-size:.78rem;grid-column:1/-1;">Selecciona especialista y fecha.</p>';
+    return;
+  }
+  grid.innerHTML = '<p style="color:#9CA3AF;font-size:.78rem;grid-column:1/-1;">Cargando…</p>';
+  const { ok, data } = await apiFetch(`${API}/disponibilidad.php?fecha=${adminFechaSel}&id_doctor=${idDoctor}`);
+  adminSlotsCache = (ok && data.slots) ? data.slots : [];
+  if (!adminSlotsCache.length) {
+    grid.innerHTML = '<p style="color:#9CA3AF;font-size:.78rem;grid-column:1/-1;">Sin slots disponibles.</p>';
+    return;
+  }
+  const fmt = h => {
+    const [hh, mm] = h.split(':').map(Number);
+    const ampm = hh >= 12 ? 'PM' : 'AM';
+    const h12 = hh % 12 || 12;
+    return `${h12}:${String(mm).padStart(2,'0')} ${ampm}`;
+  };
+  grid.innerHTML = adminSlotsCache.map(h =>
+    `<button class="tipo-btn${adminHorarioSel===h?' selected':''}" data-h="${h}" style="font-size:.72rem;padding:8px 4px;">${fmt(h)}</button>`
+  ).join('');
+  grid.querySelectorAll('.tipo-btn').forEach(btn => {
+    btn.addEventListener('click', () => { adminHorarioSel = btn.dataset.h; adminRenderHorarios(); });
+  });
+}
+
+document.getElementById('adminMiniCalPrev').addEventListener('click', () => {
+  adminCalM--; if(adminCalM<0){adminCalM=11;adminCalY--;} adminRenderMiniCal(adminCalY,adminCalM);
+});
+document.getElementById('adminMiniCalNext').addEventListener('click', () => {
+  adminCalM++; if(adminCalM>11){adminCalM=0;adminCalY++;} adminRenderMiniCal(adminCalY,adminCalM);
+});
+
+document.getElementById('btnNuevaCitaAdmin').addEventListener('click', abrirModalAgendarCita);
+document.getElementById('btnCerrarModalCita').addEventListener('click', () => {
+  document.getElementById('modalAgendarCitaAdmin').classList.remove('open');
+});
+document.getElementById('btnCancelarModalCita').addEventListener('click', () => {
+  document.getElementById('modalAgendarCitaAdmin').classList.remove('open');
+});
+document.getElementById('modalAgendarCitaAdmin').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalAgendarCitaAdmin'))
+    document.getElementById('modalAgendarCitaAdmin').classList.remove('open');
+});
+
+document.getElementById('btnGuardarCitaAdmin').addEventListener('click', async () => {
+  const idPaciente = document.getElementById('citaPacienteAdmin').value;
+  const idDoctor   = document.getElementById('citaDoctorAdmin').value;
+  const notas      = document.getElementById('citaNotasAdmin').value.trim();
+  const btn        = document.getElementById('btnGuardarCitaAdmin');
+
+  if (!idPaciente)     { showToast(' Selecciona un paciente');     return; }
+  if (!idDoctor)       { showToast(' Selecciona un especialista'); return; }
+  if (!adminFechaSel)  { showToast(' Selecciona una fecha');       return; }
+  if (!adminHorarioSel){ showToast(' Selecciona un horario');      return; }
+
+  // adminHorarioSel ya viene en formato HH:MM:SS del API
+  const hora24 = adminHorarioSel.length === 5 ? adminHorarioSel + ':00' : adminHorarioSel;
+
+  btn.disabled = true; btn.textContent = 'Guardando...';
+
+  const { ok, data } = await apiFetch(`${API}/citas.php`, {
+    method: 'POST',
+    body: JSON.stringify({ id_paciente: idPaciente, id_doctor: idDoctor, fecha: adminFechaSel, hora: hora24, notas })
+  });
+
+  btn.disabled = false; btn.textContent = 'Agendar';
+
+  if (ok) {
+    document.getElementById('modalAgendarCitaAdmin').classList.remove('open');
+    showToast(' Cita agendada correctamente');
+    cargarCitasAdmin();
+    await Promise.all([cargarCitas(), cargarPacientesYCitas()]);
+  } else {
+    showToast(' ' + (data.error || data.errors?.[0] || 'Error al agendar la cita'));
+  }
+});
+
+//  Guardar horario desde modal admin 
+document.getElementById('btnGuardarHorarioAdmin').addEventListener('click', async () => {
+  const dia = document.getElementById('horAdminDia').value;
+  const ini = document.getElementById('horAdminInicio').value;
+  const fin = document.getElementById('horAdminFin').value;
+  if (!dia) { showToast('Selecciona un día'); return; }
+  if (!ini || !fin) { showToast('Completa las horas'); return; }
+  if (ini >= fin) { showToast('La hora inicio debe ser menor que la hora fin'); return; }
+
+  const btn = document.getElementById('btnGuardarHorarioAdmin');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+
+  const { ok, data } = await apiFetch(`${API}/horarios.php?id_doctor=${horarioDoctorId}`, {
+    method: 'POST',
+    body: JSON.stringify({ dia_semana: dia, hora_inicio: ini, hora_fin: fin })
+  });
+  btn.disabled = false; btn.textContent = ' Guardar horario';
+
+  if (ok) {
+    showToast('Horario guardado ');
+    document.getElementById('horAdminDia').value    = '';
+    document.getElementById('horAdminInicio').value = '09:00';
+    document.getElementById('horAdminFin').value    = '17:00';
+    cargarHorariosAdminDoctor();
+  } else {
+    showToast(' ' + (data.errors ? data.errors.join(', ') : data.mensaje || 'Error'));
+  }
+});
+
+// 
+//  NOTIFICACIONES
+// 
+const NOTIF_ICONS = { cita_agendada:'', cita_cancelada:'' };
+
+async function cargarNotificaciones() {
+  const { ok, data } = await apiFetch(`${API}/notificaciones.php`);
+  if (!ok) return;
+  const badge = document.getElementById('notifBadge');
+  const list  = document.getElementById('notifList');
+  if (data.no_leidas > 0) {
+    badge.style.cssText = 'display:flex;align-items:center;justify-content:center;position:absolute;top:1px;right:1px;min-width:16px;height:16px;padding:0 3px;background:#EF4444;border-radius:50%;font-size:.6rem;font-weight:700;color:#fff;border:1.5px solid #fff;';
+    badge.textContent = data.no_leidas > 9 ? '9+' : data.no_leidas;
+  } else { badge.style.display = 'none'; }
+  if (!data.notificaciones.length) {
+    list.innerHTML = '<div style="padding:24px;text-align:center;color:#9CA3AF;font-size:.83rem;">Sin notificaciones</div>';
+    return;
+  }
+  list.innerHTML = data.notificaciones.map(n => {
+
+    const titulo = n.tipo === 'cita_agendada' ? 'Cita nueva' : 'Cita cancelada';
+    const fecha  = new Date(n.creada_en).toLocaleDateString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    return `<div style="padding:12px 16px;border-bottom:1px solid #F3F4F6;background:${n.leida==1?'#fff':'#F0FDF4'};cursor:pointer;" data-id="${n.id_notif}">
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:.78rem;font-weight:700;color:#111827;">${titulo}</div>
+          <div style="font-size:.74rem;color:#6B7280;margin-top:2px;line-height:1.35;">${n.mensaje}</div>
+          <div style="font-size:.68rem;color:#9CA3AF;margin-top:3px;">${fecha}</div>
+        </div>
+        ${n.leida==0?'<span style="width:8px;height:8px;background:#2D7A4F;border-radius:50%;flex-shrink:0;margin-top:4px;"></span>':''}
+      </div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('[data-id]').forEach(el => {
+    el.addEventListener('click', async () => {
+      await apiFetch(`${API}/notificaciones.php`,{method:'POST',body:JSON.stringify({id_notif:el.dataset.id})});
+      document.getElementById('notifPanel').style.display = 'none';
+      // Ir a citas
+      document.querySelectorAll('.sidebar-link').forEach(b=>b.classList.remove('active'));
+      document.querySelector('[data-page="citas"]').classList.add('active');
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.getElementById('page-citas').classList.add('active');
+      cargarCitasAdmin();
+      cargarNotificaciones();
+    });
+  });
+}
+
+document.getElementById('btnNotif').addEventListener('click', e => {
+  e.stopPropagation();
+  const panel = document.getElementById('notifPanel');
+  const visible = panel.style.display !== 'none';
+  panel.style.display = visible ? 'none' : 'block';
+  if (!visible) cargarNotificaciones();
+});
+document.getElementById('btnLeerTodas').addEventListener('click', async e => {
+  e.stopPropagation();
+  await apiFetch(`${API}/notificaciones.php`,{method:'POST',body:JSON.stringify({accion:'leer_todas'})});
+  cargarNotificaciones();
+});
+document.addEventListener('click', e => {
+  if (!document.getElementById('notifPanel').contains(e.target) &&
+      !document.getElementById('btnNotif').contains(e.target))
+    document.getElementById('notifPanel').style.display = 'none';
+});
+cargarNotificaciones();
+setInterval(cargarNotificaciones, 60000);
+</script>
+
+</body>
+</html>

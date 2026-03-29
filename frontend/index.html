@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOXUM — Orientación & Apoyo</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/landing.css" />
+</head>
+<body>
+
+  <!-- ══ NAVBAR ══ -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">
+        <!-- Logo SVG inline -->
+        <img class="brand-logo" src="img/logocompas.jpeg" alt="COPAS"/>
+          <rect width="36" height="36" rx="10" fill="#2D7A4F"/>
+          <path d="M12 24V14l6 7 6-7v10" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="11" r="2.5" fill="#C8EDD8"/>
+        </svg>
+        <div class="brand-text">
+          <strong>NOXUM</strong>
+          <span>Orientación & Apoyo</span>
+        </div>
+      </a>
+
+      <div class="navbar-links">
+        <a href="#inicio">Inicio</a>
+        <a href="#servicios">Servicios</a>
+        <a href="especialistas.html">Especialistas</a>
+      </div>
+
+      <div class="navbar-actions">
+        <a href="login.html" class="btn btn-ghost">Iniciar Sesión</a>
+        <a href="register.html" class="btn btn-primary">Agendar Cita</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ══ HERO ══ -->
+  <section class="hero" id="inicio">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-tag">Centro Psicológico</div>
+        <h1 class="hero-title">
+          Tu bienestar<br>
+          <span class="accent">comienza</span><br>
+          aquí.
+        </h1>
+        <p class="hero-desc">
+          En el Centro de Orientación Psicológica y Atención Social brindamos herramientas profesionales para tu salud mental y acompañamiento en procesos sociales.
+        </p>
+        <div class="hero-actions">
+          <a href="register.html" class="btn btn-primary">Solicitar Cita</a>
+          <a href="login.html"    class="btn btn-outline">Acceder a mi portal</a>
+        </div>
+      </div>
+
+      <div class="hero-image-wrap">
+        <div class="hero-card">
+          <!-- Ilustración mano con corazón -->
+          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M100 145 C60 115, 30 90, 45 60 C55 38, 80 38, 100 60 C120 38, 145 38, 155 60 C170 90, 140 115, 100 145Z" fill="#2D7A4F" opacity=".5"/>
+            <path d="M60 155 Q100 175 140 155 L145 130 Q100 150 55 130Z" fill="#2D7A4F" opacity=".4"/>
+            <path d="M55 130 L145 130 Q150 115 145 100 L55 100 Q50 115 55 130Z" fill="#2D7A4F" opacity=".3"/>
+          </svg>
+        </div>
+
+        <div class="hero-badge top-right">
+          <span class="dot"></span>
+          Especialistas certificados
+        </div>
+
+        <div class="hero-badge bottom-left">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#2D7A4F" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          Citas disponibles hoy
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SERVICIOS ══ -->
+  <section class="servicios" id="servicios">
+    <div class="container">
+      <div class="section-header">
+        <h2>Nuestra Atención Especializada</h2>
+        <p>Servicios diseñados para acompañarte en cada etapa de tu proceso.</p>
+      </div>
+
+      <div class="servicios-grid">
+
+        <!-- Card 1 -->
+        <div class="servicio-card">
+          <div class="servicio-icon">
+            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#2D7A4F" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+          </div>
+          <h3 class="servicio-titulo">Psicoterapia Clínica</h3>
+          <p class="servicio-desc">Tratamiento para ansiedad, depresión y procesos de duelo con especialistas certificados.</p>
+          <a href="#" class="servicio-link">Ver detalles →</a>
+        </div>
+
+        <!-- Card 2 — Featured -->
+        <div class="servicio-card featured">
+          <div class="servicio-icon">
+            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <h3 class="servicio-titulo">Atención Social</h3>
+          <p class="servicio-desc">Acompañamiento en vulnerabilidad social, orientación familiar y mediación comunitaria.</p>
+          <a href="especialistas.html" class="servicio-link">Ver detalles →</a>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="servicio-card">
+          <div class="servicio-icon">
+            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#2D7A4F" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+            </svg>
+          </div>
+          <h3 class="servicio-titulo">Regístrate</h3>
+          <p class="servicio-desc">Te acompañamos a este gran cambio en ti. Crea tu cuenta y agenda tu primera sesión.</p>
+          <a href="register.html" class="servicio-link">Comenzar →</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ══ -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">
+            <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
+              <rect width="36" height="36" rx="10" fill="#5BAF7A" opacity=".3"/>
+              <path d="M12 24V14l6 7 6-7v10" stroke="#C8EDD8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="18" cy="11" r="2.5" fill="#C8EDD8"/>
+            </svg>
+            <div>
+              <strong>NOXUM</strong>
+              <span>Orientación & Apoyo</span>
+            </div>
+          </div>
+          <p class="footer-desc">Espacio dedicado a la orientación, apoyo y transformación social.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Centro</h4>
+          <a href="#">Nuestro equipo</a>
+          <a href="#">Instalaciones</a>
+          <a href="#">Ética profesional</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Soporte</h4>
+          <a href="#">Preguntas frecuentes</a>
+          <a href="#">Contacto</a>
+          <a href="#">Emergencias</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Centro</h4>
+          <a href="login.html">Iniciar sesión</a>
+          <a href="register.html">Registrarse</a>
+          <a href="#">Agendar cita</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        © 2026 NOXUM — Todos los derechos reservados.
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

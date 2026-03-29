@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Doctor — COPAS</title>
+  <link rel="stylesheet" href="css/dashboard_doctor.css"/>
+</head>
+<!-- PROTECCIÓN DE ROL: solo doctores pueden entrar aquí -->
+<script src="js/guard.js" data-rol="doctor"></script>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <img src="img/logocompas.jpeg" alt="COPAS" style="width:32px;height:32px;object-fit:contain;border-radius:6px;">
+    </div>
+    <div class="sidebar-brand-text">
+      <strong>COPAS</strong>
+      <span>Orientación & Apoyo</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <button class="sidebar-link active" data-page="inicio">
+      <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+      </svg>
+      Dashboard
+    </button>
+    <button class="sidebar-link" data-page="calendario">
+      <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+      </svg>
+      Calendario
+    </button>
+    <button class="sidebar-link" data-page="pacientes">
+      <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      Pacientes
+    </button>
+    <button class="sidebar-link" data-page="horarios">
+      <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      Mi Horario
+    </button>
+  </nav>
+
+
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-search">
+      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#94A3B8" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input type="text" placeholder="Buscar paciente, cita..."/>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-notif" id="btnNotif">
+        <svg width="21" height="21" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+        <span class="notif-badge" id="notifBadge" style="display:none"></span>
+      </div>
+
+      <!-- Panel notificaciones -->
+      <div id="notifPanel" style="display:none; position:absolute; top:54px; right:60px; width:320px; background:#fff;
+           border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,.15); z-index:500; overflow:hidden; border:1px solid #E5E7EB;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid #F3F4F6;">
+          <span style="font-weight:700; font-size:.9rem; color:#111827;">Notificaciones</span>
+          <button id="btnLeerTodas" style="font-size:.72rem; color:#2D7A4F; background:none; border:none; cursor:pointer; font-weight:600;">Marcar todas leídas</button>
+        </div>
+        <div id="notifList" style="max-height:340px; overflow-y:auto;"></div>
+      </div>
+
+      <div class="topbar-avatar" id="topbarAvatar">D</div>
+    </div>
+  </header>
+
+  <!-- PAGE: INICIO -->
+  <main class="page active" id="page-inicio">
+    <div class="dash-hero">
+      <div class="dash-hero-left">
+        <p class="dash-hero-greeting">Buenos días, <strong id="heroNombre">Dr. Kim!</strong></p>
+        <p class="dash-hero-sub">Tienes <b id="heroCitas">5 pacientes</b> con citas hoy. Gestiona tu disponibilidad desde el calendario.</p>
+        <div class="dash-hero-actions">
+          <button class="hero-btn hero-btn-primary" id="btnNuevaCitaHero">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            Nueva Cita
+          </button>
+          <button class="hero-btn hero-btn-secondary" id="btnModificarHorario">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            Modificar Horario
+          </button>
+        </div>
+      </div>
+      <img src="img/admin.png" alt="Doctor" class="dash-hero-img" onerror="this.style.display='none'"/>
+    </div>
+
+    <div class="dash-grid">
+      <!-- Patient List -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <span class="dash-card-title">Patient List</span>
+          <span class="dash-card-meta">
+            Hoy
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </span>
+        </div>
+        <div id="patientList"></div>
+      </div>
+
+      <!-- Calendar mini -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <span class="dash-card-title">Calendar</span>
+        </div>
+        <div class="calendar-nav">
+          <button class="cal-nav-btn" id="calPrev">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <span class="cal-month" id="calMonth"></span>
+          <button class="cal-nav-btn" id="calNext">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-legend" style="margin-top:10px">
+          <div class="cal-legend-item">
+            <div class="legend-dot" style="background:var(--green-light)"></div>
+            Disponible
+          </div>
+          <div class="cal-legend-item">
+            <div class="legend-dot" style="background:var(--red)"></div>
+            Bloqueado
+          </div>
+        </div>
+        <div class="upcoming-section">
+          <div class="upcoming-header">
+            <span class="upcoming-title">Próximas Citas</span>
+            <a href="#" class="view-all" id="viewAllLink">Ver todo</a>
+          </div>
+          <div id="upcomingList"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- PAGE: CALENDARIO DISPONIBILIDAD -->
+  <main class="page" id="page-calendario">
+    <div class="disp-header">
+      <div>
+        <div class="page-header-title">Gestión de Disponibilidad</div>
+        <div class="page-header-sub">Haz clic en los días para bloquear o liberar fechas</div>
+      </div>
+      <button class="btn btn-primary" id="btnNuevaCitaCal">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nueva Cita
+      </button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" id="statLibres">0</div>
+        <div class="stat-label">Días disponibles</div>
+        <span class="stat-badge badge-green">Este mes</span>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statBloqueados">0</div>
+        <div class="stat-label">Días bloqueados</div>
+        <span class="stat-badge badge-red">Este mes</span>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statCitas">8</div>
+        <div class="stat-label">Citas programadas</div>
+        <span class="stat-badge badge-blue">Este mes</span>
+      </div>
+    </div>
+
+    <div class="big-cal-wrap">
+      <div class="big-cal-nav">
+        <button class="big-cal-nav-btn" id="bigCalPrev">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <span class="big-cal-month" id="bigCalMonth"></span>
+        <button class="big-cal-nav-btn" id="bigCalNext">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+      <div class="big-cal-grid" id="bigCalGrid"></div>
+      <div class="disp-info">
+        <div class="disp-info-item">
+          <div class="disp-dot" style="background:var(--green-pale); border:2px solid var(--green-light)"></div>
+          Disponible (clic para bloquear)
+        </div>
+        <div class="disp-info-item">
+          <div class="disp-dot" style="background:#FEE2E2; border:2px solid var(--red)"></div>
+          Bloqueado (clic para liberar)
+        </div>
+        <div class="disp-info-item">
+          <div class="disp-dot" style="background:var(--white); border:2px solid var(--green-mid)"></div>
+          Hoy
+        </div>
+        <div class="disp-info-item">
+          <div class="disp-dot" style="background:var(--gray-100)"></div>
+          Pasado / Sin acción
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- PAGE: PACIENTES -->
+  <main class="page" id="page-pacientes">
+    <div class="page-header">
+      <div>
+        <div class="page-header-title">Pacientes</div>
+        <div class="page-header-sub">Historial completo de citas por paciente</div>
+      </div>
+      <button class="btn btn-primary" id="btnNuevaCitaPac">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nueva Cita
+      </button>
+    </div>
+
+    <div class="filters-row">
+      <div class="filter-search">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#94A3B8" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" placeholder="Buscar paciente..." id="searchPaciente"/>
+      </div>
+      <select class="filter-select" id="filterTipo">
+        <option value="">Todos los tipos</option>
+      </select>
+      <select class="filter-select" id="filterEstado">
+        <option value="">Todos los estados</option>
+        <option value="Agendada">Agendada</option>
+        <option value="Atendida">Atendida</option>
+        <option value="Cancelada">Cancelada</option>
+      </select>
+    </div>
+
+    <div class="patients-table">
+      <div class="pt-header">
+        <div class="pt-col">Paciente</div>
+        <div class="pt-col">Última Cita</div>
+        <div class="pt-col">Tipo</div>
+        <div class="pt-col">Estado</div>
+        <div class="pt-col">Total Citas</div>
+        <div class="pt-col">Acción</div>
+      </div>
+      <div id="patientsTableBody"></div>
+    </div>
+  </main>
+
+  <!-- PAGE: HORARIOS -->
+  <main class="page" id="page-horarios">
+    <div class="page-header">
+      <div>
+        <div class="page-header-title">Mi Horario Semanal</div>
+        <div class="page-header-sub">Configura tus días y horas de atención. Los slots de citas se generarán automáticamente.</div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; max-width:900px;">
+      <!-- Formulario agregar/editar -->
+      <div class="dash-card" style="padding:24px;">
+        <div class="dash-card-header" style="margin-bottom:18px;">
+          <span class="dash-card-title">Agregar / Editar Día</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div>
+            <label class="form-label" style="margin-bottom:6px; display:block;">Día de la semana</label>
+            <select id="horDia" style="width:100%; padding:9px 12px; border:1px solid var(--gray-200); border-radius:8px; background:var(--white); color:var(--gray-700); font-size:.85rem;">
+              <option value="">— Seleccionar —</option>
+              <option value="lunes">Lunes</option>
+              <option value="martes">Martes</option>
+              <option value="miercoles">Miércoles</option>
+              <option value="jueves">Jueves</option>
+              <option value="viernes">Viernes</option>
+              <option value="sabado">Sábado</option>
+              <option value="domingo">Domingo</option>
+            </select>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div>
+              <label class="form-label" style="margin-bottom:6px; display:block;">Hora inicio</label>
+              <input type="time" id="horInicio" value="09:00"
+                style="width:100%; padding:9px 12px; border:1px solid var(--gray-200); border-radius:8px; font-size:.85rem; color:var(--gray-700); background:var(--white);">
+            </div>
+            <div>
+              <label class="form-label" style="margin-bottom:6px; display:block;">Hora fin</label>
+              <input type="time" id="horFin" value="17:00"
+                style="width:100%; padding:9px 12px; border:1px solid var(--gray-200); border-radius:8px; font-size:.85rem; color:var(--gray-700); background:var(--white);">
+            </div>
+          </div>
+          <button class="btn btn-primary" id="btnGuardarHorario" style="margin-top:4px;">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+            Guardar Horario
+          </button>
+          <p style="font-size:.75rem; color:var(--gray-400); margin:0;">Se generará 1 slot por hora entre la hora inicio y fin.</p>
+        </div>
+      </div>
+
+      <!-- Tabla horarios actuales -->
+      <div class="dash-card" style="padding:24px;">
+        <div class="dash-card-header" style="margin-bottom:18px;">
+          <span class="dash-card-title">Horarios configurados</span>
+          <span class="dash-card-meta" id="horariosCnt">0 días</span>
+        </div>
+        <div id="horariosTableWrap">
+          <div style="text-align:center; padding:32px 0; color:var(--gray-400); font-size:.85rem;">
+            Cargando horarios…
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL: AGENDAR CITA -->
+<div class="modal-overlay" id="modalCita">
+  <div class="modal">
+    <button class="modal-close" id="modalCitaClose">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+    <div class="modal-title">Agendar Cita</div>
+    <div class="modal-sub">Gestión de disponibilidad</div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 22px;">
+      <div>
+        <div style="margin-bottom:16px">
+          <div class="form-label" style="margin-bottom:8px">Paciente</div>
+          <select class="form-select" id="citaPaciente">
+            <option value="">-- Seleccionar --</option>
+          </select>
+        </div>
+        <div style="margin-bottom:16px">
+          <div class="form-label" style="margin-bottom:8px">Tipo de Consulta</div>
+          <div class="tipo-group">
+            <button class="tipo-btn selected" data-tipo="Seguimiento">Seguimiento</button>
+            <button class="tipo-btn" data-tipo="Resultado">Resultado</button>
+          </div>
+        </div>
+        <div style="margin-bottom:16px">
+          <div class="form-label" style="margin-bottom:8px">Horario</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;" id="horariosGrid"></div>
+        </div>
+        <div>
+          <div class="form-label" style="margin-bottom:8px">Notas (opcional)</div>
+          <textarea class="form-textarea" id="citaNotas" placeholder="Observaciones de la cita..."></textarea>
+        </div>
+      </div>
+      <div>
+        <div class="form-label" style="margin-bottom:8px">Fecha</div>
+        <div class="mini-cal-wrap">
+          <div class="mini-cal-nav">
+            <button class="mini-cal-nav-btn" id="miniCalPrev">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+              </svg>
+            </button>
+            <span class="mini-cal-month" id="miniCalMonth"></span>
+            <button class="mini-cal-nav-btn" id="miniCalNext">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+          <div class="mini-cal-grid" id="miniCalGrid"></div>
+        </div>
+        <div id="fechaSelLabel" style="margin-top:10px; font-size:.78rem; color:var(--green-mid); font-weight:600; min-height:20px; text-align:center;"></div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-cancel" id="modalCitaCancelBtn">Cancelar</button>
+      <button class="btn btn-primary" id="btnAceptarCita">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: HISTORIAL PACIENTE -->
+<div class="modal-overlay" id="modalHistorial">
+  <div class="modal">
+    <button class="modal-close" id="modalHistClose">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+    <div id="histPacienteInfo" style="display:flex; align-items:center; gap:14px; margin-bottom:4px;"></div>
+    <div class="modal-sub" id="histSubtitle">Historial completo de citas</div>
+    <div class="modal-divider"></div>
+    <div class="historial-list" id="historialList"></div>
+    <div class="form-actions">
+      <button class="btn btn-primary" id="btnNuevaCitaDesdeHist">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nueva Cita
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CONFIRMAR CANCELAR CITA -->
+<div class="modal-overlay" id="modalCancelar">
+  <div class="modal modal-cancelar">
+    <div class="modal-cancelar-icon">
+      <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#EF4444" stroke-width="2.2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+      </svg>
+    </div>
+    <div class="modal-cancelar-title">¿SEGURO QUÉ QUIERE<br>CANCELAR LA CITA?</div>
+    <div id="cancelarCitaInfo" class="modal-cancelar-info"></div>
+    <div class="modal-cancelar-actions">
+      <button class="btn-cancel" id="btnNoCancelar">No, regresar</button>
+      <button class="btn-si-cancelar" id="btnSiCancelar">Sí, cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+  </svg>
+  <span id="toastMsg">Acción realizada</span>
+</div>
+
+
+<!-- MODAL: PERFIL -->
+<div class="modal-overlay" id="modalPerfil">
+  <div class="modal-perfil">
+    <button class="modal-perfil-close" id="btnCerrarPerfil">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <div class="modal-perfil-avatar" id="perfilAvatar">D</div>
+
+    <div class="modal-perfil-nombre" id="perfilNombre">DR. NOMBRE</div>
+
+    <button class="modal-perfil-logout" id="btnLogout">
+      CERRAR SESIÓN
+    </button>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost/noxum/backend/api';
+
+async function apiFetch(url, opts = {}) {
+  try {
+    const res = await fetch(url, {
+      ...opts,
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) }
+    });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, status: res.status, data };
+  } catch(e) {
+    return { ok: false, status: 0, data: { error: 'Sin conexión al servidor' } };
+  }
+}
+
+const MESES  = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DIAS   = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+const COLORES = ['#2D7A4F','#3B82F6','#8B5CF6','#F59E0B','#EF4444','#06B6D4','#EC4899'];
+
+// Slots se cargan dinámicamente desde el API según la fecha seleccionada
+let horariosDisponibles = [];
+
+let pacientes      = [];
+let disponibilidad = {};
+let idDoctorActual = null;
+let horariosConfig = []; // horarios semanales configurados
+
+const hoy = new Date();
+function fmtDate(d){ return d.toISOString().split('T')[0]; }
+
+let saliendoSesion = false;
+
+(async () => {
+  const { ok, data } = await apiFetch(`${API}/login.php?check`);
+  if (!ok) { window.location.replace('index.html'); return; }
+
+  const u = data.usuario;
+  document.getElementById('heroNombre').textContent = u.nombre + '!';
+  document.getElementById('topbarAvatar').textContent = u.nombre.charAt(0).toUpperCase();
+  if(document.getElementById('perfilNombre')) {
+    document.getElementById('perfilNombre').textContent = u.nombre.toUpperCase();
+    document.getElementById('perfilAvatar').textContent = u.nombre.charAt(0).toUpperCase();
+  }
+  document.getElementById('perfilNombre').textContent = u.nombre.toUpperCase();
+  document.getElementById('perfilAvatar').textContent = u.nombre.charAt(0).toUpperCase();
+
+  await Promise.all([
+    cargarCitasHoy(),
+    cargarPacientes(),
+    cargarDisponibilidad(hoy.getMonth() + 1, hoy.getFullYear()),
+  ]);
+
+  renderCalendar(calYear, calMonth);
+  renderPatientList();
+  renderUpcoming();
+})();
+
+async function cargarCitasHoy() {
+  const { ok, data } = await apiFetch(`${API}/citas.php?hoy=1`);
+  if (ok) {
+    document.getElementById('heroCitas').textContent = `${data.total ?? 0} pacientes`;
+  }
+}
+
+async function cargarPacientes() {
+  const { ok, data } = await apiFetch(`${API}/pacientes.php`);
+  if (!ok) return;
+  const lista = data.pacientes || [];
+  pacientes = await Promise.all(lista.map(async (p) => {
+    const r = await apiFetch(`${API}/citas.php?paciente=${p.id_paciente}`);
+    const citas = (r.ok ? r.data.citas : []).map(c => ({
+      fecha:   c.fecha,
+      hora:    c.hora,
+      tipo:    estadoLabel(c.estado),
+      estado:  estadoLabel(c.estado),
+      nota:    '',
+      id_cita: c.id_cita,
+    }));
+    return {
+      id:     p.id_paciente,
+      nombre: p.nombre,
+      email:  p.email,
+      tipo:   estadoLabel(p.ultimo_estado),
+      estado: estadoLabel(p.ultimo_estado),
+      total:  parseInt(p.total_citas) || 0,
+      citas,
+    };
+  }));
+  renderPatientsTable();
+}
+
+function estadoLabel(e) {
+  const map = { agendada:'Agendada', cancelada:'Cancelada', atendida:'Atendida' };
+  return map[(e||'').toLowerCase()] || 'Sin citas';
+}
+
+async function cargarDisponibilidad(mes, anio) {
+  const { ok, data } = await apiFetch(`${API}/disponibilidad.php?mes=${mes}&anio=${anio}`);
+  if (ok && data.disponibilidad) {
+    Object.assign(disponibilidad, data.disponibilidad);
+  }
+}
+
+// Navegación sidebar
+document.querySelectorAll('.sidebar-link[data-page]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const page = btn.dataset.page;
+    document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    if(page === 'calendario') renderBigCalendar(bigCalYear, bigCalMonth);
+    if(page === 'pacientes') renderPatientsTable();
+    if(page === 'horarios') cargarHorariosConfig();
+  });
+});
+
+document.getElementById('viewAllLink').addEventListener('click', e => {
+  e.preventDefault();
+  document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
+  document.querySelector('[data-page="pacientes"]').classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-pacientes').classList.add('active');
+  renderPatientsTable();
+});
+
+document.getElementById('btnModificarHorario').addEventListener('click', () => {
+  document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
+  document.querySelector('[data-page="calendario"]').classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-calendario').classList.add('active');
+  renderBigCalendar(bigCalYear, bigCalMonth);
+});
+
+// Abrir modal perfil
+document.getElementById('topbarAvatar').addEventListener('click', () => {
+  document.getElementById('modalPerfil').classList.add('open');
+});
+
+// Cerrar sesión
+document.getElementById('btnLogout').addEventListener('click', async () => {
+  await apiFetch(`${API}/login.php?logout`, { method: 'POST' });
+  sessionStorage.clear();
+  localStorage.clear();
+  window.location.replace('index.html');
+});
+
+document.getElementById('btnCerrarPerfil').addEventListener('click', () => {
+  document.getElementById('modalPerfil').classList.remove('open');
+});
+document.getElementById('modalPerfil').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modalPerfil')) {
+    document.getElementById('modalPerfil').classList.remove('open');
+  }
+});
+
+// Patient List
+function renderPatientList() {
+  const timeLabels  = ['9:10 AM','1:30 PM','3:50 PM','11:45 AM','2:20 PM','4:15 PM'];
+  const timeClasses = ['time-morning','time-noon','time-late','time-evening','time-morning','time-noon'];
+  const html = pacientes.slice(0,5).map((p,i) => {
+    const ini = p.nombre.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    return `
+      <div class="patient-item" onclick="abrirHistorial(${p.id})">
+        <div class="patient-avatar" style="background:${COLORES[i%COLORES.length]}">${ini}</div>
+        <div class="patient-info">
+          <div class="patient-name">${p.nombre}</div>
+          <div class="patient-type">${p.tipo}</div>
+        </div>
+        <span class="patient-time ${timeClasses[i%timeClasses.length]}">${timeLabels[i%timeLabels.length]}</span>
+      </div>`;
+  }).join('');
+  document.getElementById('patientList').innerHTML = html;
+}
+
+function renderUpcoming() {
+  const proximas = pacientes.filter(p => p.estado === 'Agendada').slice(0,3);
+  const html = proximas.map(p => {
+    const ini  = p.nombre.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const cita = p.citas.find(c => c.estado === 'Agendada');
+    const fecha = cita ? new Date(cita.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}) : '';
+    return `
+      <div class="upcoming-item">
+        <div class="upcoming-dot">${ini}</div>
+        <div class="upcoming-info">
+          <div class="upcoming-name">${p.nombre}</div>
+          <div class="upcoming-date">${fecha} | ${cita ? cita.hora?.slice(0,5) : ''}</div>
+        </div>
+      </div>`;
+  }).join('');
+  document.getElementById('upcomingList').innerHTML = html || '<div style="text-align:center;color:var(--gray-400);font-size:.8rem;padding:12px">Sin próximas citas</div>';
+}
+
+// Calendario mini
+let calYear = hoy.getFullYear(), calMonth = hoy.getMonth();
+
+function renderCalendar(y, m) {
+  const firstDay = new Date(y, m, 1).getDay();
+  const diasMes  = new Date(y, m+1, 0).getDate();
+  document.getElementById('calMonth').textContent = `${MESES[m].toLowerCase()} ${y}`;
+  let html = DIAS.map(d=>`<div class="cal-dow">${d.slice(0,1)}</div>`).join('');
+  for(let i=0; i<firstDay; i++) html += `<div class="cal-day empty"></div>`;
+  for(let d=1; d<=diasMes; d++) {
+    const key = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = d===hoy.getDate() && m===hoy.getMonth() && y===hoy.getFullYear();
+    const disp = disponibilidad[key];
+    let cls = 'cal-day';
+    if(isToday) cls += ' today';
+    if(disp === 'libre') cls += ' disponible';
+    if(disp === 'bloqueado') cls += ' bloqueado';
+    html += `<div class="${cls}">${d}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+}
+
+renderCalendar(calYear, calMonth);
+document.getElementById('calPrev').addEventListener('click', () => {
+  calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(calYear, calMonth);
+});
+document.getElementById('calNext').addEventListener('click', () => {
+  calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(calYear, calMonth);
+});
+
+// Big Calendar
+let bigCalYear = hoy.getFullYear(), bigCalMonth = hoy.getMonth();
+
+function renderBigCalendar(y, m) {
+  const firstDay = new Date(y, m, 1).getDay();
+  const diasMes  = new Date(y, m+1, 0).getDate();
+  const hoyKey   = fmtDate(hoy);
+  document.getElementById('bigCalMonth').textContent = `${MESES[m]} ${y}`;
+  let html = DIAS.map(d=>`<div class="big-cal-dow">${d}</div>`).join('');
+  for(let i=0; i<firstDay; i++) html += `<div class="big-cal-day empty"></div>`;
+  for(let d=1; d<=diasMes; d++) {
+    const key     = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayDate = new Date(y, m, d);
+    const isToday = key === hoyKey;
+    const isPast  = dayDate < new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+    const esFin   = dayDate.getDay() === 0 || dayDate.getDay() === 6;
+    const disp    = disponibilidad[key];
+    let cls = 'big-cal-day', tip = '';
+    if(isPast || esFin) { cls += ' past'; }
+    else if(isToday)              { cls += ' today';        tip = 'Hoy'; }
+    else if(disp === 'libre')     { cls += ' disp-libre';   tip = 'Disponible — clic para bloquear'; }
+    else if(disp === 'bloqueado') { cls += ' disp-bloqueado'; tip = 'Bloqueado — clic para liberar'; }
+    else { tip = 'Sin definir — clic para marcar disponible'; }
+    html += `<div class="${cls}" data-key="${key}" data-tip="${tip}">${d}</div>`;
+  }
+  document.getElementById('bigCalGrid').innerHTML = html;
+  updateStats();
+  document.querySelectorAll('#bigCalGrid .big-cal-day:not(.empty):not(.past)').forEach(cell => {
+    cell.addEventListener('click', () => toggleDisponibilidad(cell.dataset.key));
+  });
+}
+
+async function toggleDisponibilidad(key) {
+  const cur = disponibilidad[key];
+  const nuevoEstado = (!cur || cur === 'bloqueado') ? 'libre' : 'bloqueado';
+  disponibilidad[key] = nuevoEstado;
+  renderBigCalendar(bigCalYear, bigCalMonth);
+  renderCalendar(calYear, calMonth);
+  const { ok, data } = await apiFetch(`${API}/disponibilidad.php`, {
+    method: 'POST',
+    body: JSON.stringify({ fecha: key, estado: nuevoEstado })
+  });
+  if (ok) {
+    showToast(nuevoEstado === 'libre' ? 'Día marcado como disponible ' : 'Día bloqueado ');
+  } else {
+    disponibilidad[key] = cur;
+    renderBigCalendar(bigCalYear, bigCalMonth);
+    showToast('Error al guardar. ¿Tienes permisos de doctor?');
+  }
+}
+
+function updateStats() {
+  const m = bigCalMonth, y = bigCalYear;
+  const prefix = `${y}-${String(m+1).padStart(2,'0')}-`;
+  const keys   = Object.keys(disponibilidad).filter(k => k.startsWith(prefix));
+  document.getElementById('statLibres').textContent     = keys.filter(k => disponibilidad[k]==='libre').length;
+  document.getElementById('statBloqueados').textContent = keys.filter(k => disponibilidad[k]==='bloqueado').length;
+}
+
+document.getElementById('bigCalPrev').addEventListener('click', async () => {
+  bigCalMonth--; if(bigCalMonth<0){bigCalMonth=11;bigCalYear--;}
+  await cargarDisponibilidad(bigCalMonth + 1, bigCalYear);
+  renderBigCalendar(bigCalYear, bigCalMonth);
+});
+document.getElementById('bigCalNext').addEventListener('click', async () => {
+  bigCalMonth++; if(bigCalMonth>11){bigCalMonth=0;bigCalYear++;}
+  await cargarDisponibilidad(bigCalMonth + 1, bigCalYear);
+  renderBigCalendar(bigCalYear, bigCalMonth);
+});
+
+// Tabla pacientes
+function renderPatientsTable(lista) {
+  lista = lista || pacientes;
+  const badgeMap = { 'Agendada':'badge-blue','Atendida':'badge-green','Cancelada':'badge-red','Sin citas':'badge-amber' };
+  const html = lista.map((p,i) => {
+    const ini    = p.nombre.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const ultimaF = p.citas.length ? new Date(p.citas[0].fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    return `
+      <div class="pt-row" onclick="abrirHistorial(${p.id})">
+        <div class="pt-patient">
+          <div class="pt-avatar" style="background:${COLORES[i%COLORES.length]}">${ini}</div>
+          <div>
+            <div class="pt-name">${p.nombre}</div>
+            <div class="pt-email">${p.email}</div>
+          </div>
+        </div>
+        <div class="pt-cell">${ultimaF}</div>
+        <div class="pt-cell"><span class="badge ${badgeMap[p.estado]||'badge-blue'}">${p.estado}</span></div>
+        <div class="pt-cell"><span class="badge ${badgeMap[p.estado]||'badge-blue'}">${p.estado}</span></div>
+        <div class="pt-cell" style="font-weight:600">${p.total}</div>
+        <div>
+          ${p.citas.some(c => c.estado.toLowerCase() === 'agendada') ? `<button class="pt-action-btn btn-cancelar-cita" onclick="event.stopPropagation(); abrirCancelarDesdePaciente(${p.id})">Cancelar</button>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+  document.getElementById('patientsTableBody').innerHTML = html || '<div class="empty-state"><p>Sin pacientes</p></div>';
+}
+
+document.getElementById('searchPaciente').addEventListener('input', filtrarPacientes);
+document.getElementById('filterTipo').addEventListener('change', filtrarPacientes);
+document.getElementById('filterEstado').addEventListener('change', filtrarPacientes);
+
+function filtrarPacientes() {
+  const q   = document.getElementById('searchPaciente').value.toLowerCase();
+  const est = document.getElementById('filterEstado').value;
+  const res = pacientes.filter(p =>
+    (!q   || p.nombre.toLowerCase().includes(q) || p.email.includes(q)) &&
+    (!est || p.estado.toLowerCase() === est.toLowerCase())
+  );
+  renderPatientsTable(res);
+}
+
+// Modal historial
+function abrirHistorial(id) {
+  const p = pacientes.find(x => x.id === id);
+  if(!p) return;
+  const ini = p.nombre.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  const idx = pacientes.indexOf(p);
+  document.getElementById('histPacienteInfo').innerHTML = `
+    <div class="pt-avatar" style="background:${COLORES[idx%COLORES.length]};width:46px;height:46px;font-size:.82rem">${ini}</div>
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--gray-800)">${p.nombre}</div>
+      <div style="font-size:.76rem;color:var(--gray-400)">${p.email}</div>
+    </div>`;
+  document.getElementById('histSubtitle').textContent = `${p.citas.length} citas registradas`;
+  const badgeMap = { 'Agendada':'badge-blue','Atendida':'badge-green','Cancelada':'badge-red','Sin citas':'badge-amber' };
+  const iconMap  = {
+    'Agendada':  `<div class="hist-icon" style="background:#DBEAFE"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--blue)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>`,
+    'Atendida':  `<div class="hist-icon" style="background:var(--green-pale)"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--green-mid)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>`,
+    'Cancelada': `<div class="hist-icon" style="background:#FEE2E2"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#EF4444" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>`,
+  };
+  const html = p.citas.map(c => {
+    const f = new Date(c.fecha+'T12:00:00').toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) + (c.hora ? ' — ' + c.hora.slice(0,5) : '');
+    return `
+      <div class="historial-item">
+        ${iconMap[c.estado] || iconMap['Agendada']}
+        <div class="hist-info" style="flex:1">
+          <div class="hist-date">${f}</div>
+          <div class="hist-tipo"><span class="badge ${badgeMap[c.estado]||'badge-blue'}">${c.estado}</span> · ${c.hora?.slice(0,5) || ''}</div>
+          ${c.nota ? `<div class="hist-nota">${c.nota}</div>` : ''}
+        </div>
+        ${c.estado === 'Agendada' ? `<button class="pt-action-btn btn-cancelar-hist" onclick="abrirCancelar(${c.id_cita}, '${f}', '${p.nombre}')">Cancelar</button>` : ''}
+      </div>`;
+  }).join('');
+  document.getElementById('historialList').innerHTML = html || '<div class="empty-state"><p>Sin citas registradas</p></div>';
+  document.getElementById('btnNuevaCitaDesdeHist').onclick = () => {
+    cerrarModal('modalHistorial');
+    abrirModalCita(p.id);
+  };
+  document.getElementById('modalHistorial').classList.add('open');
+}
+
+document.getElementById('modalHistClose').addEventListener('click', () => cerrarModal('modalHistorial'));
+
+// Modal nueva cita
+let miniCalYear = hoy.getFullYear(), miniCalMonth = hoy.getMonth();
+let fechaSeleccionada = null, horarioSeleccionado = null, tipoSeleccionado = 'Seguimiento';
+
+async function abrirModalCita(pacienteIdPresel) {
+  if (pacientes.length === 0) await cargarPacientes();
+  const sel = document.getElementById('citaPaciente');
+  if (pacientes.length === 0) {
+    const { ok, data } = await apiFetch(`${API}/pacientes.php?todos=1`);
+    const lista = (ok ? data.pacientes : []) || [];
+    sel.innerHTML = '<option value="">-- Seleccionar paciente --</option>' +
+      lista.map(p => `<option value="${p.id_paciente}"${p.id_paciente==pacienteIdPresel?' selected':''}>${p.nombre}</option>`).join('');
+  } else {
+    sel.innerHTML = '<option value="">-- Seleccionar paciente --</option>' +
+      pacientes.map(p => `<option value="${p.id}"${p.id==pacienteIdPresel?' selected':''}>${p.nombre}</option>`).join('');
+  }
+  fechaSeleccionada = null;
+  horarioSeleccionado = null;
+  document.getElementById('fechaSelLabel').textContent = '';
+  miniCalYear = hoy.getFullYear();
+  miniCalMonth = hoy.getMonth();
+  renderMiniCal(miniCalYear, miniCalMonth);
+  renderHorarios();
+  document.getElementById('modalCita').classList.add('open');
+}
+
+function renderMiniCal(y, m) {
+  const firstDay = new Date(y, m, 1).getDay();
+  const diasMes  = new Date(y, m+1, 0).getDate();
+  document.getElementById('miniCalMonth').textContent = `${MESES[m].slice(0,3)} ${y}`;
+  let html = DIAS.map(d=>`<div class="mini-cal-dow">${d.slice(0,1)}</div>`).join('');
+  for(let i=0; i<firstDay; i++) html += `<div class="mini-cal-day empty"></div>`;
+  for(let d=1; d<=diasMes; d++) {
+    const key   = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dDate = new Date(y,m,d);
+    const isPast = dDate < new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+    const esFin  = dDate.getDay()===0 || dDate.getDay()===6;
+    let cls = 'mini-cal-day';
+    if(isPast || esFin) cls += ' disabled';
+    if(key === fmtDate(hoy)) cls += ' today-mark';
+    if(key === fechaSeleccionada) cls += ' selected';
+    html += `<div class="${cls}" data-key="${key}">${d}</div>`;
+  }
+  document.getElementById('miniCalGrid').innerHTML = html;
+  document.querySelectorAll('#miniCalGrid .mini-cal-day:not(.disabled):not(.empty)').forEach(cell => {
+    cell.addEventListener('click', () => {
+      fechaSeleccionada = cell.dataset.key;
+      horarioSeleccionado = null;
+      const f = new Date(fechaSeleccionada+'T12:00:00').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+      document.getElementById('fechaSelLabel').textContent = ' ' + f;
+      renderMiniCal(miniCalYear, miniCalMonth);
+      renderHorarios();
+    });
+  });
+}
+
+async function renderHorarios() {
+  const grid = document.getElementById('horariosGrid');
+  if (!fechaSeleccionada) {
+    grid.innerHTML = '<p style="color:var(--gray-400);font-size:.8rem;grid-column:1/-1;">Selecciona primero una fecha.</p>';
+    return;
+  }
+  grid.innerHTML = '<p style="color:var(--gray-400);font-size:.8rem;grid-column:1/-1;">Cargando…</p>';
+  const { ok, data } = await apiFetch(`${API}/disponibilidad.php?fecha=${fechaSeleccionada}`);
+  if (!ok || !data.slots) {
+    grid.innerHTML = '<p style="color:var(--gray-400);font-size:.8rem;grid-column:1/-1;">Sin horarios disponibles.</p>';
+    return;
+  }
+  horariosDisponibles = data.slots; // e.g. ["09:00:00","10:00:00"]
+  if (!horariosDisponibles.length) {
+    grid.innerHTML = '<p style="color:var(--gray-400);font-size:.8rem;grid-column:1/-1;">No hay slots disponibles para este día.</p>';
+    return;
+  }
+  const fmt = h => {
+    const [hh, mm] = h.split(':').map(Number);
+    const ampm = hh >= 12 ? 'PM' : 'AM';
+    const h12 = hh % 12 || 12;
+    return `${h12}:${String(mm).padStart(2,'0')} ${ampm}`;
+  };
+  const html = horariosDisponibles.map(h => {
+    const label = fmt(h);
+    return `<button class="tipo-btn${horarioSeleccionado===h?' selected':''}" data-h="${h}"
+      style="font-size:.72rem; padding:8px 4px;">${label}</button>`;
+  }).join('');
+  grid.innerHTML = html;
+  grid.querySelectorAll('.tipo-btn').forEach(btn => {
+    btn.addEventListener('click', () => { horarioSeleccionado = btn.dataset.h; renderHorarios(); });
+  });
+}
+
+document.querySelectorAll('.tipo-btn[data-tipo]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tipo-btn[data-tipo]').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    tipoSeleccionado = btn.dataset.tipo;
+  });
+});
+
+document.getElementById('miniCalPrev').addEventListener('click', () => {
+  miniCalMonth--; if(miniCalMonth<0){miniCalMonth=11;miniCalYear--;} renderMiniCal(miniCalYear, miniCalMonth);
+});
+document.getElementById('miniCalNext').addEventListener('click', () => {
+  miniCalMonth++; if(miniCalMonth>11){miniCalMonth=0;miniCalYear++;} renderMiniCal(miniCalYear, miniCalMonth);
+});
+
+document.getElementById('btnAceptarCita').addEventListener('click', async () => {
+  const pacId = parseInt(document.getElementById('citaPaciente').value);
+  if (!pacId)             { showToast('Selecciona un paciente');  return; }
+  if (!fechaSeleccionada) { showToast('Selecciona una fecha');    return; }
+  if (!horarioSeleccionado){ showToast('Selecciona un horario'); return; }
+  // horarioSeleccionado ya es formato HH:MM:SS del API
+  const hora24 = horarioSeleccionado.length === 5 ? horarioSeleccionado + ':00' : horarioSeleccionado;
+  const btn = document.getElementById('btnAceptarCita');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  const { ok, data } = await apiFetch(`${API}/citas.php`, {
+    method: 'POST',
+    body: JSON.stringify({ id_paciente: pacId, fecha: fechaSeleccionada, hora: hora24 }),
+  });
+  btn.disabled = false; btn.textContent = 'Aceptar';
+  if (!ok) { showToast(data.errors ? data.errors.join(', ') : 'Error al guardar'); return; }
+  cerrarModal('modalCita');
+  document.getElementById('citaNotas').value = '';
+  fechaSeleccionada = null; horarioSeleccionado = null;
+  await cargarPacientes();
+  await cargarCitasHoy();
+  renderPatientList();
+  renderUpcoming();
+  const pac = pacientes.find(p => p.id === pacId);
+  showToast(`Cita agendada para ${pac ? pac.nombre : 'el paciente'} `);
+});
+
+['btnNuevaCitaHero','btnNuevaCitaCal','btnNuevaCitaPac'].forEach(id => {
+  document.getElementById(id).addEventListener('click', () => abrirModalCita(null));
+});
+
+['modalCitaClose','modalCitaCancelBtn'].forEach(id => {
+  document.getElementById(id).addEventListener('click', () => cerrarModal('modalCita'));
+});
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if(e.target === overlay) cerrarModal(overlay.id); });
+});
+
+function cerrarModal(id){ document.getElementById(id).classList.remove('open'); }
+
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+//  CANCELAR CITA 
+let citaACancelarId = null;
+
+function abrirCancelar(idCita, fechaLabel, nombrePaciente) {
+  citaACancelarId = idCita;
+  document.getElementById('cancelarCitaInfo').textContent = fechaLabel + ' — ' + nombrePaciente;
+  document.getElementById('modalCancelar').classList.add('open');
+}
+
+function abrirCancelarDesdePaciente(idPaciente) {
+  const p = pacientes.find(x => x.id === idPaciente);
+  if (!p) return;
+  const citaAgendada = p.citas.find(c => c.estado.toLowerCase() === 'agendada');
+  if (!citaAgendada) return;
+  const f = new Date(citaAgendada.fecha + 'T12:00:00').toLocaleDateString('es-MX', {
+    day: 'numeric', month: 'short', year: 'numeric'
+  });
+  abrirCancelar(citaAgendada.id_cita, f + ' ' + (citaAgendada.hora ? citaAgendada.hora.slice(0,5) : ''), p.nombre);
+}
+
+document.getElementById('btnNoCancelar').addEventListener('click', () => cerrarModal('modalCancelar'));
+
+document.getElementById('btnSiCancelar').addEventListener('click', async () => {
+  if (!citaACancelarId) return;
+
+  const btn = document.getElementById('btnSiCancelar');
+  btn.disabled = true;
+  btn.textContent = 'Cancelando...';
+
+  const { ok, data } = await apiFetch(`${API}/citas.php`, {
+    method: 'PUT',
+    body: JSON.stringify({ id_cita: citaACancelarId, estado: 'cancelada' })
+  });
+
+  btn.disabled = false;
+  btn.textContent = 'Sí, cancelar';
+  cerrarModal('modalCancelar');
+  citaACancelarId = null;
+
+  if (ok) {
+    showToast('Cita cancelada correctamente ');
+    cerrarModal('modalHistorial');
+    await cargarPacientes();
+    renderPatientList();
+    renderUpcoming();
+  } else {
+    showToast(' Error al cancelar: ' + (data.error || data.errors?.[0] || 'intenta de nuevo'));
+  }
+});
+
+// 
+//  HORARIOS CONFIG
+// 
+const DIAS_LABEL = {
+  lunes:'Lunes', martes:'Martes', miercoles:'Miércoles',
+  jueves:'Jueves', viernes:'Viernes', sabado:'Sábado', domingo:'Domingo'
+};
+const DIAS_ORDER = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
+
+async function cargarHorariosConfig() {
+  const wrap = document.getElementById('horariosTableWrap');
+  wrap.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--gray-400);font-size:.85rem;">Cargando…</div>';
+  const { ok, data } = await apiFetch(`${API}/horarios.php`);
+  if (!ok) {
+    wrap.innerHTML = '<div style="color:var(--red);font-size:.85rem;">Error al cargar horarios.</div>';
+    return;
+  }
+  horariosConfig = data.horarios || [];
+  document.getElementById('horariosCnt').textContent = `${horariosConfig.length} día${horariosConfig.length !== 1 ? 's' : ''}`;
+
+  if (!horariosConfig.length) {
+    wrap.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--gray-400);font-size:.85rem;">Sin horarios configurados aún.</div>';
+    return;
+  }
+
+  // Sort by week order
+  const sorted = [...horariosConfig].sort((a,b) => DIAS_ORDER.indexOf(a.dia_semana) - DIAS_ORDER.indexOf(b.dia_semana));
+  wrap.innerHTML = `
+    <table style="width:100%; border-collapse:collapse; font-size:.83rem;">
+      <thead>
+        <tr style="color:var(--gray-400); text-align:left;">
+          <th style="padding:6px 8px;">Día</th>
+          <th style="padding:6px 8px;">Inicio</th>
+          <th style="padding:6px 8px;">Fin</th>
+          <th style="padding:6px 8px; text-align:center;">Slots/día</th>
+          <th style="padding:6px 8px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${sorted.map(h => {
+          const [hi, ] = h.hora_inicio.split(':').map(Number);
+          const [hf, ] = h.hora_fin.split(':').map(Number);
+          const slots  = Math.max(0, hf - hi);
+          return `<tr style="border-top:1px solid var(--gray-100);">
+            <td style="padding:8px 8px; font-weight:600; color:var(--gray-700);">${DIAS_LABEL[h.dia_semana] || h.dia_semana}</td>
+            <td style="padding:8px 8px; color:var(--gray-600);">${h.hora_inicio}</td>
+            <td style="padding:8px 8px; color:var(--gray-600);">${h.hora_fin}</td>
+            <td style="padding:8px 8px; text-align:center;">
+              <span class="badge badge-green">${slots}h</span>
+            </td>
+            <td style="padding:8px 4px; text-align:right;">
+              <button class="btn" data-edit-id="${h.id_horario}" data-dia="${h.dia_semana}"
+                data-ini="${h.hora_inicio}" data-fin="${h.hora_fin}"
+                style="padding:4px 10px; font-size:.75rem; margin-right:4px;">
+                Editar
+              </button>
+              <button class="btn" data-del-id="${h.id_horario}"
+                style="padding:4px 10px; font-size:.75rem; background:var(--red); color:#fff; border-color:var(--red);">
+                Eliminar
+              </button>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+
+  // Edit buttons
+  wrap.querySelectorAll('[data-edit-id]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('horDia').value    = btn.dataset.dia;
+      document.getElementById('horInicio').value = btn.dataset.ini;
+      document.getElementById('horFin').value    = btn.dataset.fin;
+      document.getElementById('horDia').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+
+  // Delete buttons
+  wrap.querySelectorAll('[data-del-id]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm(`¿Eliminar horario del ${DIAS_LABEL[btn.closest('tr').querySelector('[data-edit-id]')?.dataset.dia] || 'día'}?`)) return;
+      const { ok, data } = await apiFetch(`${API}/horarios.php?id=${btn.dataset.delId}`, { method: 'DELETE' });
+      if (ok) { showToast('Horario eliminado'); cargarHorariosConfig(); }
+      else showToast(' ' + (data.mensaje || 'Error'));
+    });
+  });
+}
+
+document.getElementById('btnGuardarHorario').addEventListener('click', async () => {
+  const dia  = document.getElementById('horDia').value;
+  const ini  = document.getElementById('horInicio').value;
+  const fin  = document.getElementById('horFin').value;
+  if (!dia) { showToast('Selecciona un día'); return; }
+  if (!ini || !fin) { showToast('Completa las horas'); return; }
+  if (ini >= fin) { showToast('La hora inicio debe ser menor que la hora fin'); return; }
+
+  const btn = document.getElementById('btnGuardarHorario');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+
+  const { ok, data } = await apiFetch(`${API}/horarios.php`, {
+    method: 'POST',
+    body: JSON.stringify({ dia_semana: dia, hora_inicio: ini, hora_fin: fin })
+  });
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Guardar Horario`;
+
+  if (ok) {
+    showToast(`Horario del ${DIAS_LABEL[dia]} guardado `);
+    document.getElementById('horDia').value = '';
+    document.getElementById('horInicio').value = '09:00';
+    document.getElementById('horFin').value = '17:00';
+    cargarHorariosConfig();
+  } else {
+    showToast(' ' + (data.errors ? data.errors.join(', ') : data.mensaje || 'Error'));
+  }
+});
+
+// 
+//  NOTIFICACIONES
+// 
+async function cargarNotificaciones() {
+  const { ok, data } = await apiFetch(`${API}/notificaciones.php`);
+  if (!ok) return;
+  const badge = document.getElementById('notifBadge');
+  const list  = document.getElementById('notifList');
+  if (data.no_leidas > 0) {
+    badge.style.cssText = 'display:flex;align-items:center;justify-content:center;position:absolute;top:1px;right:1px;min-width:16px;height:16px;padding:0 3px;background:#EF4444;border-radius:50%;font-size:.6rem;font-weight:700;color:#fff;border:1.5px solid #fff;';
+    badge.textContent = data.no_leidas > 9 ? '9+' : data.no_leidas;
+  } else { badge.style.display = 'none'; }
+  if (!data.notificaciones.length) {
+    list.innerHTML = '<div style="padding:24px;text-align:center;color:#9CA3AF;font-size:.83rem;">Sin notificaciones</div>';
+    return;
+  }
+  list.innerHTML = data.notificaciones.map(n => {
+
+    const titulo = n.tipo === 'cita_agendada' ? 'Cita nueva' : 'Cita cancelada';
+    const fecha  = new Date(n.creada_en).toLocaleDateString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    return `<div style="padding:12px 16px;border-bottom:1px solid #F3F4F6;background:${n.leida==1?'#fff':'#F0FDF4'};cursor:pointer;" data-id="${n.id_notif}">
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:.78rem;font-weight:700;color:#111827;">${titulo}</div>
+          <div style="font-size:.74rem;color:#6B7280;margin-top:2px;line-height:1.35;">${n.mensaje}</div>
+          <div style="font-size:.68rem;color:#9CA3AF;margin-top:3px;">${fecha}</div>
+        </div>
+        ${n.leida==0?'<span style="width:8px;height:8px;background:#2D7A4F;border-radius:50%;flex-shrink:0;margin-top:4px;"></span>':''}
+      </div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('[data-id]').forEach(el => {
+    el.addEventListener('click', async () => {
+      await apiFetch(`${API}/notificaciones.php`,{method:'POST',body:JSON.stringify({id_notif:el.dataset.id})});
+      document.getElementById('notifPanel').style.display = 'none';
+      // Ir a pacientes (citas del doctor)
+      document.querySelectorAll('.sidebar-link').forEach(b=>b.classList.remove('active'));
+      document.querySelector('[data-page="pacientes"]').classList.add('active');
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.getElementById('page-pacientes').classList.add('active');
+      renderPatientsTable();
+      cargarNotificaciones();
+    });
+  });
+}
+
+document.getElementById('btnNotif').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const panel = document.getElementById('notifPanel');
+  const visible = panel.style.display !== 'none';
+  panel.style.display = visible ? 'none' : 'block';
+  if (!visible) cargarNotificaciones();
+});
+
+document.getElementById('btnLeerTodas').addEventListener('click', async (e) => {
+  e.stopPropagation();
+  await apiFetch(`${API}/notificaciones.php`, { method:'POST', body: JSON.stringify({ accion:'leer_todas' }) });
+  cargarNotificaciones();
+});
+
+document.addEventListener('click', (e) => {
+  if (!document.getElementById('notifPanel').contains(e.target) &&
+      !document.getElementById('btnNotif').contains(e.target)) {
+    document.getElementById('notifPanel').style.display = 'none';
+  }
+});
+
+// Cargar conteo al iniciar y cada 60s
+cargarNotificaciones();
+setInterval(cargarNotificaciones, 60000);
+</script>
+</body>
+</html>
