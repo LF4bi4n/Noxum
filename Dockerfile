@@ -8,4 +8,5 @@ COPY . .
 
 EXPOSE 8080
 
-CMD ["/bin/sh", "-c", "php -S 0.0.0.0:${PORT:-8080} router.php"]
+ENTRYPOINT ["/bin/sh", "-c"]
+CMD ["php -S 0.0.0.0:${PORT:-8080} router.php"]
