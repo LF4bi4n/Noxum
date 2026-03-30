@@ -1,0 +1,4 @@
+cat > nixpacks.toml << 'EOF'
+[start]
+cmd = "php -S 0.0.0.0:$PORT router.php"
+EOF
