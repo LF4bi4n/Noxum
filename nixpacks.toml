@@ -1,4 +1,2 @@
-cat > nixpacks.toml << 'EOF'
 [start]
 cmd = "sh start.sh"
-EOF
